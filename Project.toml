@@ -1,0 +1,6 @@
+authors = ["Jaan Tollander de Balsch <jaan.tollander@gmail.com>"]
+name = "ShelfSpaceAllocation"
+uuid = "97feaf0c-89bb-11e9-0f61-254e188ba389"
+version = "0.1.0"
+
+[deps]
