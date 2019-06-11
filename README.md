@@ -15,3 +15,17 @@ This package requires Julia version 1.0 or above. It also depends on the followi
 - [Gurobi.jl](https://github.com/JuliaOpt/Gurobi.jl) -- Julia interface for Gurobi solver used for solving the MILP.
 
 <!-- TODO: In Julia REPL run `using Pkg; Pkg.build("Gurobi")` -->
+
+
+## Documentation
+The project documentation is created using [Documenter.jl](https://juliadocs.github.io/Documenter.jl/stable/).
+
+In the projects root directory, add the `ShelfSpaceAllocation` package locally from Julia REPL by running
+```julia
+using Pkg: Pkg.add(".")
+```
+
+In order to build the documentation, navigate inside the `docs` directory and run the command
+```bash
+julia make.jl
+```

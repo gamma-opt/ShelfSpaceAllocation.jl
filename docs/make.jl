@@ -3,7 +3,7 @@ using ShelfSpaceAllocation
 
 makedocs(
     sitename = "ShelfSpaceAllocation",
-    format = :html,
+    format = Documenter.HTML(),
     modules = [ShelfSpaceAllocation]
 )
 
@@ -11,5 +11,5 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 #=deploydocs(
-    repo = "<repository url>"
+    repo = "github.com/jaantollander/ShelfSpaceAllocation.jl.git"
 )=#
