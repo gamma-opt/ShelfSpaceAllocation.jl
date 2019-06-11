@@ -1,12 +1,13 @@
 module ShelfSpaceAllocation
 
 using JuMP, Gurobi, CSV
+using Base.Filesystem 
 
 
 # Load data from CSV files. Data is read into a DataFrame.
-# TODO: absolute path
-product_data = CSV.read("../data/Anonymized space allocation data for 9900-shelf.csv")
-shelf_data = CSV.read("../data/scenario_9900_shelves.csv")
+project_dir = dirname(@__DIR__)
+product_data = CSV.read(joinpath(project_dir, "data", "Anonymized space allocation data for 9900-shelf.csv"))
+shelf_data = CSV.read(joinpath(project_dir, "data", "scenario_9900_shelves.csv"))
 
 
 # Sets and Subsets
