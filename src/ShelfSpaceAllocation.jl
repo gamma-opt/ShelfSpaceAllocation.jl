@@ -5,32 +5,66 @@ using Base.Filesystem
 
 
 # Load data from CSV files. Data is read into a DataFrame.
-project_dir = dirname(@__DIR__)
+project_dir = dirname(@__DIR__) |> dirname
+
+"""
+Fields:
+* product_id
+* width
+* height
+* length
+* ItemNetWeightKg
+* monthly_demand
+* replenishment_interval
+* price
+* unit_margin
+* blocking_field
+* min_facing
+* max_facing
+* max_stack
+* up_down_order_cr
+* block_order_cr
+"""
 product_data = CSV.read(joinpath(project_dir, "data", "Anonymized space allocation data for 9900-shelf.csv"))
+
+"""
+Fields:
+* Module
+* id
+* Level
+* Total_Width
+* Total_Height
+* Total_Length
+* Product_Min_Unit_Weight
+* Product_Max_Unit_Weight
+"""
 shelf_data = CSV.read(joinpath(project_dir, "data", "scenario_9900_shelves.csv"))
 
 
 # Sets and Subsets
-# TODO: compute from loaded data
-products = 1:10  # p
-shelves = 1:10   # s
+products = 1:size(product_data)[1]  # p
+shelves = 1:size(shelf_data)[1]   # s
+
+# TODO: compute from product_data
 blocks = 1:10    # b
+# modules = nothing
 
 
 # Parameters
-# TODO: replace nothings
 G_p = product_data.price
-H_s = nothing
-L_p = nothing
-P_ps = nothing  # compute from other values
+H_s = shelf_data.Height
+# TODO: Set by user?
+L_p = ones(size(products))
+# TODO: correctness? column vector
+P_ps = tranpose(shelf_data.Total_Length) ./ product_data.length
 D_p = product_data.monthly_demand
-N_p_max = nothing
-N_p_min = nothing
+N_p_max = product_data.min_facing
+N_p_min = product_data.max_facing
 W_p = product_data.width
-W_s = nothing
+W_s = shelf_data.Width
 M_p = product_data.ItemNetWeightKg
-M_s_min = nothing
-M_s_max = nothing
+M_s_min = shelf_data.Product_Min_Unit_Weight
+M_s_max = shelf_data.Product_Max_Unit_Weight
 R_p = product_data.replenishment_interval
 
 
@@ -63,6 +97,10 @@ model = Model(with_optimizer(Gurobi.Optimizer))
 # TODO: name the constraints
 @constraint(model, [p = products], 
     s_p[p] == min(sum(30 / R_p[p] * P_ps[p, s] * n_ps[ps] for s in shelves), D_p))
+@constraint(model, [p = products], 
+    s_p[p] + e_p[p] == D_p[p])
+@constraint(model, [p = products], 
+    N_p_min ≤ sum(n_ps[p, :]) ≤ N_p_max)
 
 
 # Optimize
