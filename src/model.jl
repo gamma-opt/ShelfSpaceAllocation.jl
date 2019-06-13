@@ -3,7 +3,7 @@ using Base.Filesystem
 
 
 # Load data from CSV files. Data is read into a DataFrame.
-project_dir = dirname(@__DIR__) |> dirname
+project_dir = dirname(dirname(@__DIR__))
 
 """
 Fields:
@@ -84,6 +84,9 @@ model = Model(with_optimizer(Gurobi.Optimizer))
 @variable(model, v_bm[blocks], Bin)
 @variable(model, x_bs[blocks, shelves] ≥ 0)
 @variable(model, z_bs[blocks, shelves], Bin)
+@variable(model, w_bb[blocks, blocks], Bin)
+@variable(model, x_bs_f[blocks, shelves], Bin)
+@variable(model, x_bs_l[blocks, shelves], Bin)
 
 
 # Objective
@@ -116,10 +119,7 @@ model = Model(with_optimizer(Gurobi.Optimizer))
     b_bs[b, s] ≤ m_bm[b] + W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves], 
     b_bs[b, s] ≤ W_s[s] * z_bs[b, s])
-
-# TODO: variables z_bs_f, z_bs_l
-# TODO: shelves condition
-@constraint(model, [b = blocks, s = shelves], 
+@constraint(model, [b = blocks, s = shelves, s ≤ abs(length(shelves)) - 1], 
     z_bs_f[b, s+1] + z_bs[b, s] == z_bf[b, s+1] + z_bs_l[b, s])
 @constraint(model, [b = blocks], 
     sum(z_bs_f[b, s] for s in shelves) ≤ 1)
@@ -129,9 +129,22 @@ model = Model(with_optimizer(Gurobi.Optimizer))
     z_bs_f[b, s] = z_bs[b, s])
 @constraint(model, [b = blocks, s = length(shelves)], 
     z_bs_l[b, s] = z_bs[b, s])
-
-
-
+@constraint(model, [b = blocks, s = shelves],
+    sum(n_ps[p, s] for p in products) ≥ z_bs[b, s])
+@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]], 
+    n_ps[p, s] ≤ N_p_max[p] * z_bs[b, s])
+@constraint(model, [b = blocks, b′ = blocks], 
+    x_bs[b, s] ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
+@constraint(model, [b = blocks, b′ = blocks], 
+    x_bs[b′, s] ≥ x_bs[b, s] + b_bs[b, s] - W_s[s] * w_bb[b, b′])
+# @constraint(model, [b = blocks, s = shelves], )  # TODO: 21
+# @constraint(model, [b = blocks, s = shelves], )  # TODO: 22
+@constraint(model, [b = blocks, s = shelves], 
+    x_bs[b, s] ≤ W_s[s] * z_bs[b, s])
+@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]], 
+    n_ps[p, s] ≤ N_p_max[p] * v_bm[b])
+@constraint(model, [b = blocks], 
+    sum(v_bm[b]) ≤ 1)
 
 
 # Optimize
