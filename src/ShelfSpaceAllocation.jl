@@ -42,11 +42,13 @@ shelf_data = CSV.read(joinpath(project_dir, "data", "scenario_9900_shelves.csv")
 
 
 # Sets and Subsets
-products = 1:size(product_data)[1]  # p
-shelves = 1:size(shelf_data)[1]   # s
+products = 1:size(product_data, 1)  # p
+shelves = 1:size(shelf_data, 1)   # s
+# Partitions product indices by blocking_field value.
+bfs = product_data.blocking_field
+blocks_indices = [collect(products)[bfs .== bf] for bf in unique(bfs)]
+blocks = 1:size(blocks_indices, 1)  # b
 
-# TODO: compute from product_data
-blocks = 1:10    # b
 # modules = nothing
 
 
@@ -101,7 +103,9 @@ model = Model(with_optimizer(Gurobi.Optimizer))
     s_p[p] + e_p[p] == D_p[p])
 @constraint(model, [p = products], 
     N_p_min ≤ sum(n_ps[p, :]) ≤ N_p_max)
-
+@constraint(model, [p = products], 
+    sum(n_ps[p, s] ≥ y_p[p]))
+@constraint(model, )
 
 # Optimize
 # optimize!(model)
