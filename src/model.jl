@@ -1,9 +1,9 @@
 using JuMP, Gurobi, CSV
-using Base.Filesystem 
+using Base.Filesystem
 
 
 # Load data from CSV files. Data is read into a DataFrame.
-project_dir = dirname(dirname(@__DIR__))
+project_dir = dirname(@__DIR__)
 
 """
 Fields:
@@ -48,20 +48,24 @@ bfs = product_data.blocking_field
 blocks_indices = [collect(products)[bfs .== bf] for bf in unique(bfs)]
 blocks = 1:size(blocks_indices, 1)
 
+println("Products: ", products)
+println("Shelves: ", shelves)
+println("Blocks: ", blocks)
+
 # We only consider one module in this code.
 # modules = 1:1
 
 
 # Parameters
 G_p = product_data.price
-H_s = shelf_data.Height
+H_s = shelf_data.Total_Height
 L_p = ones(size(products))  # TODO: up_down_order_cr??
-P_ps = tranpose(shelf_data.Total_Length) ./ product_data.length  # TODO: check correctness
+P_ps = transpose(shelf_data.Total_Length) ./ product_data.length  # TODO: check correctness
 D_p = product_data.monthly_demand
 N_p_max = product_data.min_facing
 N_p_min = product_data.max_facing
 W_p = product_data.width
-W_s = shelf_data.Width
+W_s = shelf_data.Total_Width
 M_p = product_data.ItemNetWeightKg
 M_s_min = shelf_data.Product_Min_Unit_Weight
 M_s_max = shelf_data.Product_Max_Unit_Weight
@@ -79,35 +83,36 @@ model = Model(with_optimizer(Gurobi.Optimizer))
 @variable(model, o_s[shelves] ≥ 0)
 @variable(model, b_bs[blocks, shelves] ≥ 0)
 @variable(model, m_bm[blocks] ≥ 0)
-@variable(model, y_p[blocks], Bin)
+@variable(model, y_p[products], Bin)
 @variable(model, v_bm[blocks], Bin)
 @variable(model, x_bs[blocks, shelves] ≥ 0)
 @variable(model, x_bm[blocks] ≥ 0)
 @variable(model, z_bs[blocks, shelves], Bin)
 @variable(model, w_bb[blocks, blocks], Bin)
-@variable(model, x_bs_f[blocks, shelves], Bin)
-@variable(model, x_bs_l[blocks, shelves], Bin)
+@variable(model, z_bs_f[blocks, shelves], Bin)
+@variable(model, z_bs_l[blocks, shelves], Bin)
 
 
 # Objective
-@objective(model, Min, 
-    sum(o_s) + 
-    sum(G_p .* e_p) + 
+@objective(model, Min,
+    sum(o_s[s] for s in shelves) +
+    sum(G_p[p] * e_p[p] for p in products) +
     sum(sum(L_p[p] * H_s[s] * n_ps[p, s] for p in products) for s in shelves)
 )
 
 
 # Constraints
 # TODO: name the constraints
-@constraint(model, [p = products], 
-    s_p[p] == min(sum(30 / R_p[p] * P_ps[p, s] * n_ps[ps] for s in shelves), D_p))
-@constraint(model, [p = products], 
+# FIXME: min, transform the constraint
+@constraint(model, [p = products],
+    s_p[p] == min(sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves), D_p[p]))
+@constraint(model, [p = products],
     s_p[p] + e_p[p] == D_p[p])
-@constraint(model, [p = products], 
-    N_p_min ≤ sum(n_ps[p, :]) ≤ N_p_max)
-@constraint(model, [p = products], 
-    sum(n_ps[p, s] ≥ y_p[p]))
-@constraint(model, [s = shelves], 
+@constraint(model, [p = products],
+    N_p_min[p] ≤ sum(n_ps[p, s] for s in shelves) ≤ N_p_max[p])
+@constraint(model, [p = products],
+    sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
+@constraint(model, [s = shelves],
     sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
 @constraint(model, [s = shelves, b = blocks, p = blocks_indices[b]],
     W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
@@ -117,35 +122,35 @@ model = Model(with_optimizer(Gurobi.Optimizer))
     b_bs[b, s] ≥ m_bm[b] - W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves],
     b_bs[b, s] ≤ m_bm[b] + W_s[s] * (1 - z_bs[b, s]))
-@constraint(model, [b = blocks, s = shelves], 
+@constraint(model, [b = blocks, s = shelves],
     b_bs[b, s] ≤ W_s[s] * z_bs[b, s])
-@constraint(model, [b = blocks, s = shelves, s ≤ abs(length(shelves)) - 1], 
-    z_bs_f[b, s+1] + z_bs[b, s] == z_bf[b, s+1] + z_bs_l[b, s])
-@constraint(model, [b = blocks], 
+@constraint(model, [b = blocks, s = 1:length(shelves)-1],
+    z_bs_f[b, s+1] + z_bs[b, s] == z_bs[b, s+1] + z_bs_l[b, s])
+@constraint(model, [b = blocks],
     sum(z_bs_f[b, s] for s in shelves) ≤ 1)
-@constraint(model, [b = blocks], 
+@constraint(model, [b = blocks],
     sum(z_bs_l[b, s] for s in shelves) ≤ 1)
-@constraint(model, [b = blocks, s = 1], 
-    z_bs_f[b, s] = z_bs[b, s])
-@constraint(model, [b = blocks, s = length(shelves)], 
-    z_bs_l[b, s] = z_bs[b, s])
+@constraint(model, [b = blocks, s = 1:1],
+    z_bs_f[b, s] == z_bs[b, s])
+@constraint(model, [b = blocks, s = length(shelves)],
+    z_bs_l[b, s] == z_bs[b, s])
 @constraint(model, [b = blocks, s = shelves],
     sum(n_ps[p, s] for p in products) ≥ z_bs[b, s])
-@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]], 
+@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]],
     n_ps[p, s] ≤ N_p_max[p] * z_bs[b, s])
-@constraint(model, [b = blocks, b′ = blocks], 
+@constraint(model, [b = blocks, b′ = blocks, s = shelves],
     x_bs[b, s] ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
-@constraint(model, [b = blocks, b′ = blocks], 
+@constraint(model, [b = blocks, b′ = blocks, s = shelves],
     x_bs[b′, s] ≥ x_bs[b, s] + b_bs[b, s] - W_s[s] * w_bb[b, b′])
-@constraint(model, [b = blocks, s = shelves], 
+@constraint(model, [b = blocks, s = shelves],
     x_bm[b] ≥ x_bs[b, s] - W_s[s] * (1 - z_bs[b, s]))
-@constraint(model, [b = blocks, s = shelves], 
+@constraint(model, [b = blocks, s = shelves],
     x_bm[b] ≤ x_bs[b, s] + W_s[s] * (1 - z_bs[b, s]))
-@constraint(model, [b = blocks, s = shelves], 
+@constraint(model, [b = blocks, s = shelves],
     x_bs[b, s] ≤ W_s[s] * z_bs[b, s])
-@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]], 
+@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]],
     n_ps[p, s] ≤ N_p_max[p] * v_bm[b])
-@constraint(model, [b = blocks], 
+@constraint(model, [b = blocks],
     sum(v_bm[b]) ≤ 1)
 
 
