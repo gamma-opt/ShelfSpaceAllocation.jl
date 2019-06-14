@@ -40,12 +40,13 @@ shelf_data = CSV.read(joinpath(project_dir, "data", "scenario_9900_shelves.csv")
 
 
 # Sets and Subsets
-products = 1:size(product_data, 1)  # p
-shelves = 1:size(shelf_data, 1)   # s
-# Partitions product indices by blocking_field value.
+products = 1:size(product_data, 1)
+shelves = 1:size(shelf_data, 1)
+
+# Groups product indices by blocking_field value.
 bfs = product_data.blocking_field
 blocks_indices = [collect(products)[bfs .== bf] for bf in unique(bfs)]
-blocks = 1:size(blocks_indices, 1)  # b
+blocks = 1:size(blocks_indices, 1)
 
 # We only consider one module in this code.
 # modules = 1:1
@@ -54,10 +55,8 @@ blocks = 1:size(blocks_indices, 1)  # b
 # Parameters
 G_p = product_data.price
 H_s = shelf_data.Height
-# TODO: Set by user?
-L_p = ones(size(products))
-# TODO: correctness? column vector
-P_ps = tranpose(shelf_data.Total_Length) ./ product_data.length
+L_p = ones(size(products))  # TODO: up_down_order_cr??
+P_ps = tranpose(shelf_data.Total_Length) ./ product_data.length  # TODO: check correctness
 D_p = product_data.monthly_demand
 N_p_max = product_data.min_facing
 N_p_min = product_data.max_facing
@@ -83,6 +82,7 @@ model = Model(with_optimizer(Gurobi.Optimizer))
 @variable(model, y_p[blocks], Bin)
 @variable(model, v_bm[blocks], Bin)
 @variable(model, x_bs[blocks, shelves] ≥ 0)
+@variable(model, x_bm[blocks] ≥ 0)
 @variable(model, z_bs[blocks, shelves], Bin)
 @variable(model, w_bb[blocks, blocks], Bin)
 @variable(model, x_bs_f[blocks, shelves], Bin)
@@ -137,8 +137,10 @@ model = Model(with_optimizer(Gurobi.Optimizer))
     x_bs[b, s] ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
 @constraint(model, [b = blocks, b′ = blocks], 
     x_bs[b′, s] ≥ x_bs[b, s] + b_bs[b, s] - W_s[s] * w_bb[b, b′])
-# @constraint(model, [b = blocks, s = shelves], )  # TODO: 21
-# @constraint(model, [b = blocks, s = shelves], )  # TODO: 22
+@constraint(model, [b = blocks, s = shelves], 
+    x_bm[b] ≥ x_bs[b, s] - W_s[s] * (1 - z_bs[b, s]))
+@constraint(model, [b = blocks, s = shelves], 
+    x_bm[b] ≤ x_bs[b, s] + W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves], 
     x_bs[b, s] ≤ W_s[s] * z_bs[b, s])
 @constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]], 
