@@ -48,19 +48,17 @@ bfs = product_data.blocking_field
 blocks_indices = [collect(products)[bfs .== bf] for bf in unique(bfs)]
 blocks = 1:size(blocks_indices, 1)
 
-println("Products: ", products)
-println("Shelves: ", shelves)
-println("Blocks: ", blocks)
-
 # We only consider one module in this code.
 # modules = 1:1
 
 
 # Parameters
+# TODO: price or unit_margin?
 G_p = product_data.price
 H_s = shelf_data.Total_Height
-L_p = ones(size(products))  # TODO: up_down_order_cr??
-P_ps = transpose(shelf_data.Total_Length) ./ product_data.length  # TODO: check correctness
+# TODO: up_down_order_cr??
+L_p = ones(size(products))
+P_ps = transpose(shelf_data.Total_Length) ./ product_data.length
 D_p = product_data.monthly_demand
 N_p_max = product_data.min_facing
 N_p_min = product_data.max_facing
