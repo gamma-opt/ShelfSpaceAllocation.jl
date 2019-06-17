@@ -53,10 +53,10 @@ blocks = 1:size(blocks_indices, 1)
 
 
 # Parameters
-# TODO: price or unit_margin?
+# TODO: G_p: price or unit_margin?
 G_p = product_data.price
 H_s = shelf_data.Total_Height
-# TODO: up_down_order_cr??
+# TODO: L_p: up_down_order_cr??
 L_p = ones(size(products))
 P_ps = transpose(shelf_data.Total_Length) ./ product_data.length
 D_p = product_data.monthly_demand
@@ -102,8 +102,21 @@ model = Model(with_optimizer(Gurobi.Optimizer))
 # Constraints
 # TODO: name the constraints
 # FIXME: min, transform the constraint
+# @constraint(model, [p = products],
+#     s_p[p] == min(sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves), D_p[p]))
+# https://math.stackexchange.com/a/2564713
+# TODO: M should be large enough constant. Different M for every p? check correctness
+M = [max(sum(30 / R_p[p] * P_ps[p, s] * N_p_max[p] for s in shelves), D_p[p]) for p in products]
+@variable(model, σ[products], Bin)
 @constraint(model, [p = products],
-    s_p[p] == min(sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves), D_p[p]))
+    s_p[p] ≤ sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves))
+@constraint(model, [p = products],
+    s_p[p] ≥ sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves) - M[p] * σ[p])
+@constraint(model, [p = products],
+    s_p[p] ≤ D_p[p])
+@constraint(model, [p = products],
+    s_p[p] ≥ D_p[p] - M[p] * (1 - σ[p]))
+# ---
 @constraint(model, [p = products],
     s_p[p] + e_p[p] == D_p[p])
 @constraint(model, [p = products],
