@@ -44,6 +44,7 @@ products = 1:size(product_data, 1)
 shelves = 1:size(shelf_data, 1)
 
 # Groups product indices by blocking_field value.
+# TODO: blocking_field or block_order_cr?
 bfs = product_data.blocking_field
 blocks_indices = [collect(products)[bfs .== bf] for bf in unique(bfs)]
 blocks = 1:size(blocks_indices, 1)
@@ -56,17 +57,16 @@ blocks = 1:size(blocks_indices, 1)
 # TODO: G_p: price or unit_margin?
 G_p = product_data.unit_margin
 H_s = shelf_data.Total_Height
-# TODO: L_p: up_down_order_cr??
-L_p = ones(size(products))
+L_p = product_data.up_down_order_cr
 P_ps = transpose(shelf_data.Total_Length) ./ product_data.length
 D_p = product_data.monthly_demand
 N_p_max = product_data.min_facing
 N_p_min = product_data.max_facing
 W_p = product_data.width
 W_s = shelf_data.Total_Width
-M_p = product_data.ItemNetWeightKg
-M_s_min = shelf_data.Product_Min_Unit_Weight
-M_s_max = shelf_data.Product_Max_Unit_Weight
+# M_p = product_data.ItemNetWeightKg
+# M_s_min = shelf_data.Product_Min_Unit_Weight
+# M_s_max = shelf_data.Product_Max_Unit_Weight
 R_p = product_data.replenishment_interval
 
 
@@ -95,15 +95,12 @@ model = Model(with_optimizer(Gurobi.Optimizer))
 @objective(model, Min,
     sum(o_s[s] for s in shelves) +
     sum(G_p[p] * e_p[p] for p in products) +
-    sum(sum(L_p[p] * H_s[s] * n_ps[p, s] for p in products) for s in shelves)
+    sum(L_p[p] * H_s[s] * n_ps[p, s] for p in products for s in shelves)
 )
 
 
 # Constraints
 # TODO: name the constraints
-# ---
-# @constraint(model, [p = products],
-#     s_p[p] == min(sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves), D_p[p]))
 M = [max(maximum(30 / R_p[p] * P_ps[p, s] for s in shelves) * N_p_max[p], D_p[p]) for p in products]
 @variable(model, σ[products], Bin)
 @constraint(model, [p = products],
@@ -123,6 +120,7 @@ M = [max(maximum(30 / R_p[p] * P_ps[p, s] for s in shelves) * N_p_max[p], D_p[p]
     sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
 @constraint(model, [s = shelves],
     sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
+# ---
 @constraint(model, [s = shelves, b = blocks, p = blocks_indices[b]],
     W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
 @constraint(model, [s = shelves],
@@ -141,7 +139,7 @@ M = [max(maximum(30 / R_p[p] * P_ps[p, s] for s in shelves) * N_p_max[p], D_p[p]
     sum(z_bs_l[b, s] for s in shelves) ≤ 1)
 @constraint(model, [b = blocks, s = 1:1],
     z_bs_f[b, s] == z_bs[b, s])
-@constraint(model, [b = blocks, s = length(shelves)],
+@constraint(model, [b = blocks, s = length(shelves):length(shelves)],
     z_bs_l[b, s] == z_bs[b, s])
 @constraint(model, [b = blocks, s = shelves],
     sum(n_ps[p, s] for p in products) ≥ z_bs[b, s])
