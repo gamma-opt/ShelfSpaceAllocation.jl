@@ -38,7 +38,6 @@ Fields:
 """
 shelf_data = CSV.read(joinpath(project_dir, "data", "scenario_9900_shelves.csv"))
 
-
 # Sets and Subsets
 products = 1:size(product_data, 1)
 shelves = 1:size(shelf_data, 1)
@@ -50,7 +49,6 @@ blocks = 1:size(P_b, 1)
 
 # We only consider one module in this code.
 # modules = 1:1
-
 
 # Parameters
 G_p = product_data.unit_margin
@@ -67,10 +65,8 @@ W_s = shelf_data.Total_Width
 # M_s_max = shelf_data.Product_Max_Unit_Weight
 R_p = product_data.replenishment_interval
 
-
 # Model
 model = Model(with_optimizer(Gurobi.Optimizer))
-
 
 # Variables
 @variable(model, s_p[products] ≥ 0)
@@ -88,14 +84,12 @@ model = Model(with_optimizer(Gurobi.Optimizer))
 @variable(model, z_bs_f[blocks, shelves], Bin)
 @variable(model, z_bs_l[blocks, shelves], Bin)
 
-
 # Objective
 @objective(model, Min,
     sum(o_s[s] for s in shelves) +
     sum(G_p[p] * e_p[p] for p in products) +
     sum(L_p[p] * H_s[s] * n_ps[p, s] for p in products for s in shelves)
 )
-
 
 # Constraints
 # TODO: add weight constraint
@@ -159,7 +153,6 @@ end)
     n_ps[p, s] ≤ N_p_max[p] * v_bm[b])
 @constraint(model, [b = blocks],
     sum(v_bm[b]) ≤ 1)
-
 
 # Optimize
 optimize!(model)
