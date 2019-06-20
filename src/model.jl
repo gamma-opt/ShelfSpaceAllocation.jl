@@ -45,8 +45,8 @@ shelves = 1:size(shelf_data, 1)
 
 # Groups product indices by blocking_field value.
 bfs = product_data.blocking_field
-blocks_indices = [collect(products)[bfs .== bf] for bf in unique(bfs)]
-blocks = 1:size(blocks_indices, 1)
+P_b = [collect(products)[bfs .== bf] for bf in unique(bfs)]
+blocks = 1:size(P_b, 1)
 
 # We only consider one module in this code.
 # modules = 1:1
@@ -120,7 +120,8 @@ end)
     sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
 @constraint(model, [s = shelves],
     sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
-@constraint(model, [s = shelves, b = blocks, p = blocks_indices[b]],
+# ---
+@constraint(model, [s = shelves, b = blocks, p = P_b[b]],
     W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
 @constraint(model, [s = shelves],
     sum(b_bs[b, s] for b in blocks) ≤ W_s[s])
@@ -142,7 +143,7 @@ end)
     z_bs_l[b, s] == z_bs[b, s])
 @constraint(model, [b = blocks, s = shelves],
     sum(n_ps[p, s] for p in products) ≥ z_bs[b, s])
-@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]],
+@constraint(model, [b = blocks, s = shelves, p = P_b[b]],
     n_ps[p, s] ≤ N_p_max[p] * z_bs[b, s])
 @constraint(model, [b = blocks, b′ = blocks, s = shelves],
     x_bs[b, s] ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
@@ -154,7 +155,7 @@ end)
     x_bm[b] ≤ x_bs[b, s] + W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves],
     x_bs[b, s] ≤ W_s[s] * z_bs[b, s])
-@constraint(model, [b = blocks, s = shelves, p = blocks_indices[b]],
+@constraint(model, [b = blocks, s = shelves, p = P_b[b]],
     n_ps[p, s] ≤ N_p_max[p] * v_bm[b])
 @constraint(model, [b = blocks],
     sum(v_bm[b]) ≤ 1)
