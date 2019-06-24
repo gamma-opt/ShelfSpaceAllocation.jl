@@ -125,16 +125,18 @@ end)
     b_bs[b, s] ≤ m_bm[b] + W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves],
     b_bs[b, s] ≤ W_s[s] * z_bs[b, s])
+# ---
 @constraint(model, [b = blocks, s = 1:length(shelves)-1],
     z_bs_f[b, s+1] + z_bs[b, s] == z_bs[b, s+1] + z_bs_l[b, s])
 @constraint(model, [b = blocks],
     sum(z_bs_f[b, s] for s in shelves) ≤ 1)
 @constraint(model, [b = blocks],
     sum(z_bs_l[b, s] for s in shelves) ≤ 1)
-@constraint(model, [b = blocks, s = [1]],
-    z_bs_f[b, s] == z_bs[b, s])
-@constraint(model, [b = blocks, s = [length(shelves)]],
-    z_bs_l[b, s] == z_bs[b, s])
+@constraint(model, [b = blocks],
+    z_bs_f[b, 1] == z_bs[b, 1])
+@constraint(model, [b = blocks],
+    z_bs_l[b, end] == z_bs[b, end])
+# ---
 @constraint(model, [b = blocks, s = shelves],
     sum(n_ps[p, s] for p in products) ≥ z_bs[b, s])
 @constraint(model, [b = blocks, s = shelves, p = P_b[b]],
