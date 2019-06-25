@@ -60,9 +60,9 @@ N_p_min = product_data.min_facing
 N_p_max = product_data.max_facing
 W_p = product_data.width
 W_s = shelf_data.Total_Width
-# M_p = product_data.ItemNetWeightKg
-# M_s_min = shelf_data.Product_Min_Unit_Weight
-# M_s_max = shelf_data.Product_Max_Unit_Weight
+M_p = product_data.ItemNetWeightKg
+M_s_min = shelf_data.Product_Min_Unit_Weight
+M_s_max = shelf_data.Product_Max_Unit_Weight
 R_p = product_data.replenishment_interval
 
 # Model
@@ -114,6 +114,23 @@ end)
     sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
 @constraint(model, [s = shelves],
     sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
+
+# Weight constraint
+# @constraint(model, [s = shelves],
+#     M_s_min[s] ≤ sum(M_p[p] * n_ps[p, s] for p in products) ≤ M_s_max[s])
+
+# Height constraint
+H_p = product_data.height
+@variable(model, y_ps[products, shelves], Bin)
+@constraint(model, [p = products, s = shelves],
+    n_ps[p, s] ≤ N_p_max[p] * y_ps[p, s])
+@constraint(model, [p = products, s = shelves],
+    y_ps[p, s] * H_p[p] ≤ H_s[s])
+# ---
+@constraint(model, [s = shelves, b = blocks, p = P_b[b]],
+    W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
+@constraint(model, [s = shelves],
+    sum(b_bs[b, s] for b in blocks) ≤ W_s[s])
 # ---
 @constraint(model, [s = shelves, b = blocks, p = P_b[b]],
     W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
