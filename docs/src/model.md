@@ -1,52 +1,85 @@
 # Model
-TODO: parameters and variables
+*Sets and Subsets*
 
-**Objective**: Minimize
+- \(p∈P\) -- Products
+- \(s∈S\) -- Shelves
+- \(b∈B\) -- Blocks, index of (mutually exclusive) subsets of products
+- \(P_b⊆P\) -- Block, subset of products
+
+*Parameters*
+
+- \(G_p\) -- Unit profit of product \(p\); used as shortage penalty (treated to be \(\max\{0, G_p\}\)
+- \(R_p\) -- Replenishment period of product \(p\)
+- \(D_p\) -- Demand forecast of product \(p\)
+- \(P_{p,s}\) -- Number units per facing of product \(p\) on shelf \(s\)
+- \(N_p^{min}\), \(N_p^{max}\) -- The minimum and maximum number of facings for product \(p\)
+- \(W_p\) -- Facing width of product \(p\)
+- \(W_s\) -- Width of shelf \(s\)
+- \(M_s^{min}\), \(M_s^{max}\) -- The minimum and maximum unit weight on shelf \(s\)
+- \(M_p\) -- Unit weight of product \(p\)
+- \(H_s\) -- Height of shelf \(s\)
+- \(H_p\) -- Height of product \(p\)
+
+*Variables*
+
+- \(s_p ≥ 0\) -- Amount of product \(p\)
+- \(e_p ≥ 0\) -- Shortage of product \(p\) (mismatch between demand and on-shelf inventory)
+- \(o_s ≥ 0\) -- Total empty space on shelf \(s\)
+- \(n_{p,s} ∈ ℤ_{≥0}\) -- Number of facings of product \(p\) on shelf \(s\)
+
+**Objective**:
 \[
-∑_s o_s + ∑_p G_p e_p + ∑_{p,s} L_p H_s n_{p,s}
+\text{minimize} ∑_s o_s + ∑_p G_p e_p + ∑_{p,s} L_p H_s n_{p,s}
 \]
 
 1) Minimizes empty shelf space
 2) Minimizes lost profit
 3) Places products at preferred heights
 
-**Constraints**: Subject to
+**Constraints**:
+
+Number of product \(p\) sold must equal to the minimum of the expected sales and demand
+\[
+s_p = \min\left(∑_s \frac{30}{R_p} P_{p,s} n_{p,s}, D_p\right), ∀p \\
+\]
+
+The shortage of product \(p\) is the mismatch between demand and on-shelf inventory
+\[
+s_p + e_p = D_p, ∀p
+\]
+
+The total number of facings of product \(p\) must be withing the bounds
+\[
+N_p^{min} ≤ ∑_s n_{p,s} ≤ N_p^{max}, ∀p
+\]
+
+<!-- \[
+\begin{aligned}
+y_p ∈ \{0,1\} \\
+∑_p n_{p,s} ≥ y_{p}, ∀p \\
+\end{aligned}
+\] -->
+
+The total width of products and empty space on shelf \(s\) must be equal to the shelf width
+\[
+∑_p W_p n_{p,s} + o_s = W_s, ∀s
+\]
+
+The total weight of the products \(P\) on shelf \(s\) must be within the bounds
+\[
+M_s^{min} ≤ ∑_p M_p n_{p,s} ≤ M_s^{max}, ∀s
+\]
+
+The height of product \(p\) allocated on shelf \(s\) must be less or equal to the shelf height
+
+- \(y_{p,s} ∈ \{0,1\}\) -- Indicator which takes value \(1\) if product \(p\) is allocated on shelf \(s\) otherwise \(0\)
+
 \[
 \begin{aligned}
-& s_p = \min\left(∑_s \frac{30}{R_p} P_{p,s} n_{p,s}, D_p\right) \\
-& s_p + e_p = D_p
+n_{p, s} ≤ N_p^{max} y_{p, s}, ∀p,s \\
+y_{p,s} H_p ≤ H_s, ∀p,s
 \end{aligned}
 \]
-
-\[
-N_p^{min} ≤ ∑_s n_{p,s} ≤ N_p^{max}
-\]
-
-\[
-y_p ∈ \{0,1\} \\
-∑_p n_{p,s} ≥ y_{p} \\
-\]
-
-\[
-∑_p W_p n_{p,s} + o_s = W_s
-\]
-
-The total weight of the products \(P\) on shelf \(s\) should be within the given bounds.
-\[
-M_s^{min} ≤ ∑_p M_p n_{p,s} ≤ M_s^{max}
-\]
-
-Product \(p\) allocated on shelf \(s\) is has height \(H_p\) less than the shelf height \(H_s\).
-
-- \(y_{p,s} ∈ \{0,1\}\) -- \(1\) if product \(p\) is allocated on shelf \(s\) otherwise \(0\)
-
-\[
-n_{p, s} ≤ N_p^{max} y_{p, s} \\
-y_{p,s} H_p ≤ H_s
-\]
-
----
-
 
 ## Linearization
 The constraint $$z=\min{x, y}$$
