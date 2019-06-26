@@ -64,36 +64,25 @@ M_p = product_data.ItemNetWeightKg
 M_s_min = shelf_data.Product_Min_Unit_Weight
 M_s_max = shelf_data.Product_Max_Unit_Weight
 R_p = product_data.replenishment_interval
+L_s = shelf_data.Level
 
 # Model
-model = Model(with_optimizer(Gurobi.Optimizer))
+model = Model()
 
 # Variables
 @variable(model, s_p[products] ≥ 0)
 @variable(model, e_p[products] ≥ 0)
-@variable(model, n_ps[products, shelves] ≥ 0, Int)
 @variable(model, o_s[shelves] ≥ 0)
-@variable(model, b_bs[blocks, shelves] ≥ 0)
-@variable(model, m_bm[blocks] ≥ 0)
-@variable(model, y_p[products], Bin)
-@variable(model, v_bm[blocks], Bin)
-@variable(model, x_bs[blocks, shelves] ≥ 0)
-@variable(model, x_bm[blocks] ≥ 0)
-@variable(model, z_bs[blocks, shelves], Bin)
-@variable(model, w_bb[blocks, blocks], Bin)
-@variable(model, z_bs_f[blocks, shelves], Bin)
-@variable(model, z_bs_l[blocks, shelves], Bin)
+@variable(model, n_ps[products, shelves] ≥ 0, Int)
 
 # Objective
 @objective(model, Min,
-    sum(o_s[s] for s in shelves) +
-    sum(G_p[p] * e_p[p] for p in products) +
-    sum(L_p[p] * H_s[s] * n_ps[p, s] for p in products for s in shelves)
+    sum(o_s[s] for s in shelves)
+    + sum(G_p[p] * e_p[p] for p in products)
+    # + sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves)
 )
 
 # Constraints
-# TODO: add weight constraint
-# TODO: name the constraints
 M = [max(maximum(30 / R_p[p] * P_ps[p, s] for s in shelves) * N_p_max[p], D_p[p]) for p in products]
 @variable(model, σ[products], Bin)
 @constraints(model, begin
@@ -110,10 +99,12 @@ end)
     s_p[p] + e_p[p] == D_p[p])
 @constraint(model, [p = products],
     N_p_min[p] ≤ sum(n_ps[p, s] for s in shelves) ≤ N_p_max[p])
-@constraint(model, [p = products],
-    sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
 @constraint(model, [s = shelves],
     sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
+
+# @variable(model, y_p[products], Bin)
+# @constraint(model, [p = products],
+#     sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
 
 # Weight constraint
 # @constraint(model, [s = shelves],
@@ -126,7 +117,11 @@ H_p = product_data.height
     n_ps[p, s] ≤ N_p_max[p] * y_ps[p, s])
 @constraint(model, [p = products, s = shelves],
     y_ps[p, s] * H_p[p] ≤ H_s[s])
-# ---
+
+# Block variables and constraints
+@variable(model, b_bs[blocks, shelves] ≥ 0)
+@variable(model, m_bm[blocks] ≥ 0)
+@variable(model, z_bs[blocks, shelves], Bin)
 @constraint(model, [s = shelves, b = blocks, p = P_b[b]],
     W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
 @constraint(model, [s = shelves],
@@ -144,6 +139,8 @@ H_p = product_data.height
 @constraint(model, [b = blocks, s = shelves],
     b_bs[b, s] ≤ W_s[s] * z_bs[b, s])
 # ---
+@variable(model, z_bs_f[blocks, shelves], Bin)
+@variable(model, z_bs_l[blocks, shelves], Bin)
 @constraint(model, [b = blocks, s = 1:length(shelves)-1],
     z_bs_f[b, s+1] + z_bs[b, s] == z_bs[b, s+1] + z_bs_l[b, s])
 @constraint(model, [b = blocks],
@@ -159,6 +156,10 @@ H_p = product_data.height
     sum(n_ps[p, s] for p in products) ≥ z_bs[b, s])
 @constraint(model, [b = blocks, s = shelves, p = P_b[b]],
     n_ps[p, s] ≤ N_p_max[p] * z_bs[b, s])
+# ---
+@variable(model, x_bs[blocks, shelves] ≥ 0)
+@variable(model, x_bm[blocks] ≥ 0)
+@variable(model, w_bb[blocks, blocks], Bin)
 @constraint(model, [b = blocks, b′ = blocks, s = shelves],
     x_bs[b, s] ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
 @constraint(model, [b = blocks, b′ = blocks, s = shelves],
@@ -169,10 +170,12 @@ H_p = product_data.height
     x_bm[b] ≤ x_bs[b, s] + W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves],
     x_bs[b, s] ≤ W_s[s] * z_bs[b, s])
+# ---
+@variable(model, v_bm[blocks], Bin)
 @constraint(model, [b = blocks, s = shelves, p = P_b[b]],
     n_ps[p, s] ≤ N_p_max[p] * v_bm[b])
 @constraint(model, [b = blocks],
     sum(v_bm[b]) ≤ 1)
 
 # Optimize
-optimize!(model)
+optimize!(model, with_optimizer(Gurobi.Optimizer))
