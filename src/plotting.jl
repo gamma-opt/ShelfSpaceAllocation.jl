@@ -56,8 +56,6 @@ function barchart(blocks, shelves, P_b, N_p_max, n_ps)
     bar!(
         plt,
         [sum(n_ps[p, s] for s in shelves) for p in products],
-        bar_position=:stack,
-        # labels=["s$s" for s in shelves],
         xlabel="Product (p)",
         ylabel="Number of facings (n_ps)",
         color=colors,
