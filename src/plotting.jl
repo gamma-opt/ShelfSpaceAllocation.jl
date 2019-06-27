@@ -32,12 +32,18 @@ function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_b
     # Draw shelves - A line from (0, y[s]) to (W_s[s], y[s])
     for s in shelves
         plot!(plt, [0, W_s[s]], [y_s[s], y_s[s]],
-              color=:black, label="s_$s")
+              color=:black)
     end
     plot!(plt, [0, W_s[end]], [y_s[end], y_s[end]],
           color=:black, linestyle=:dash)
 
     return plt
+end
+
+"""Plot colors for different blocks.
+source: https://github.com/JuliaPlots/ExamplePlots.jl/blob/master/notebooks/cgrad.ipynb"""
+function colorbar()
+    return cgrad(:inferno) |> g -> RGB[g[b/length(blocks)] for b in blocks]
 end
 
 """Creates a barchart of number of product facings per product."""
