@@ -29,12 +29,23 @@
 
 **Objective**:
 \[
-\text{minimize} ∑_s o_s + ∑_p G_p e_p + ∑_{p,s} L_p H_s n_{p,s}
+\text{minimize} ∑_s o_s + ∑_p G_p e_p
 \]
 
 1) Minimizes empty shelf space
 2) Minimizes lost profit
-3) Places products at preferred heights
+<!-- 3) Places products at preferred heights \(∑_{p,s} L_p H_s n_{p,s}\) -->
+
+<!-- TODO: can be normalized
+\[
+\text{minimize} \frac{c_1}{φ_1} ∑_s o_s + \frac{c_2}{φ_2} ∑_p G_p e_p,
+\]
+where \(c_1,c_2≥0\) and \(c_1+c_2=1\) are weight coefficients.
+\[
+φ_1 = \max ∑_s o_s =  ∑_s W_s \\
+φ_2 = \max ∑_p G_p e_p = ∑_p G_p D_p
+\]
+Minimums for both objectives are \(0\) -->
 
 **Constraints**:
 
@@ -70,15 +81,17 @@ The total weight of the products \(P\) on shelf \(s\) must be within the bounds
 M_s^{min} ≤ ∑_p M_p n_{p,s} ≤ M_s^{max}, ∀s
 \]
 
-The height of product \(p\) allocated on shelf \(s\) must be less or equal to the shelf height
-
-- \(y_{p,s} ∈ \{0,1\}\) -- Indicator which takes value \(1\) if product \(p\) is allocated on shelf \(s\) otherwise \(0\)
-
+Defines an indicator variable \(y_{p,s}\) which takes value \(1\) if product \(p\) is allocated on shelf \(s\) otherwise \(0\)
 \[
 \begin{aligned}
-n_{p, s} ≤ N_p^{max} y_{p, s}, ∀p,s \\
-y_{p,s} H_p ≤ H_s, ∀p,s
+& \(y_{p,s} ∈ \{0,1\}\) \\
+& n_{p, s} ≤ N_p^{max} y_{p, s}, ∀p,s
 \end{aligned}
+\]
+
+The height of product \(p\) allocated on shelf \(s\) must be less or equal to the shelf height
+\[
+y_{p,s} H_p ≤ H_s, ∀p,s
 \]
 
 ## Linearization
