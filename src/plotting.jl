@@ -1,5 +1,4 @@
 using Plots
-using StatsPlots
 
 """Creates a planogram which visualizes the product placement on the shelves."""
 function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_bs, x_bs)
@@ -41,16 +40,27 @@ function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_b
     return plt
 end
 
-"""Creates a stacked barchart of number of product facings per product."""
-function barchart(blocks, shelves, P_b, n_ps)
-    block_colors = cgrad(:inferno)
-    plt = groupedbar(
-        n_ps,
+"""Creates a barchart of number of product facings per product."""
+function barchart(blocks, shelves, P_b, N_p_max, n_ps)
+    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for _ in P_b[b]]
+
+    # Max facings
+    plt = bar(
+        N_p_max,
+        linewidth=0,
+        color=colors,
+        background=:lightgray,
+        legend=:none,
+        alpha=0.2)
+
+    bar!(
+        plt,
+        [sum(n_ps[p, s] for s in shelves) for p in products],
         bar_position=:stack,
         # labels=["s$s" for s in shelves],
-        xlabel="Product p",
-        ylabel="Number of facings n_ps",
-        color=[block_colors[b/length(blocks)] for b in blocks for _ in P_b[b]],
+        xlabel="Product (p)",
+        ylabel="Number of facings (n_ps)",
+        color=colors,
         linewidth=0,
         legend=:none,
         background=:lightgray
