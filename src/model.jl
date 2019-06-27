@@ -126,12 +126,6 @@ H_p = product_data.height
     W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
 @constraint(model, [s = shelves],
     sum(b_bs[b, s] for b in blocks) ≤ W_s[s])
-# ---
-@constraint(model, [s = shelves, b = blocks, p = P_b[b]],
-    W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
-@constraint(model, [s = shelves],
-    sum(b_bs[b, s] for b in blocks) ≤ W_s[s])
-# ---
 @constraint(model, [b = blocks, s = shelves],
     b_bs[b, s] ≥ m_bm[b] - W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves],
@@ -160,10 +154,10 @@ H_p = product_data.height
 @variable(model, x_bs[blocks, shelves] ≥ 0)
 @variable(model, x_bm[blocks] ≥ 0)
 @variable(model, w_bb[blocks, blocks], Bin)
-@constraint(model, [b = blocks, b′ = blocks, s = shelves],
+@constraint(model, [b = blocks, b′ = filter(a->a≠b, blocks), s = shelves],
     x_bs[b, s] ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
-@constraint(model, [b = blocks, b′ = blocks, s = shelves],
-    x_bs[b′, s] ≥ x_bs[b, s] + b_bs[b, s] - W_s[s] * w_bb[b′, b])
+@constraint(model, [b = blocks, b′ = filter(a->a≠b, blocks), s = shelves],
+    x_bs[b′, s] ≥ x_bs[b, s] + b_bs[b, s] - W_s[s] * w_bb[b, b′])
 @constraint(model, [b = blocks, s = shelves],
     x_bm[b] ≥ x_bs[b, s] - W_s[s] * (1 - z_bs[b, s]))
 @constraint(model, [b = blocks, s = shelves],
