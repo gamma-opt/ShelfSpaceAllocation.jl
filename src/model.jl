@@ -77,9 +77,9 @@ model = Model()
 
 # Objective
 @objective(model, Min,
-    sum(o_s[s] for s in shelves)
-    + sum(G_p[p] * e_p[p] for p in products)
-    # + sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves)
+    sum(o_s[s] for s in shelves) +
+    sum(G_p[p] * e_p[p] for p in products) +
+    sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves)
 )
 
 # Constraints
@@ -122,8 +122,8 @@ H_p = product_data.height
 @variable(model, b_bs[blocks, shelves] ≥ 0)
 @variable(model, m_bm[blocks] ≥ 0)
 @variable(model, z_bs[blocks, shelves], Bin)
-@constraint(model, [s = shelves, b = blocks, p = P_b[b]],
-    W_p[p] * n_ps[p, s] ≤ b_bs[b, s])
+@constraint(model, [s = shelves, b = blocks],
+    sum(W_p[p] * n_ps[p, s] for p in P_b[b]) ≤ b_bs[b, s])
 @constraint(model, [s = shelves],
     sum(b_bs[b, s] for b in blocks) ≤ W_s[s])
 @constraint(model, [b = blocks, s = shelves],
