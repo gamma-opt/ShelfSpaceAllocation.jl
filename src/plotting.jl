@@ -1,5 +1,11 @@
 using Plots
 
+"""Plot colors for different blocks.
+source: https://github.com/JuliaPlots/ExamplePlots.jl/blob/master/notebooks/cgrad.ipynb"""
+function block_colorbar(blocks)
+    return cgrad(:inferno) |> g -> RGB[g[b/length(blocks)] for b in blocks]
+end
+
 """Creates a planogram which visualizes the product placement on the shelves."""
 function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_bs, x_bs)
     # Cumulative shelf heights
@@ -40,17 +46,12 @@ function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_b
     return plt
 end
 
-"""Plot colors for different blocks.
-source: https://github.com/JuliaPlots/ExamplePlots.jl/blob/master/notebooks/cgrad.ipynb"""
-function colorbar()
-    return cgrad(:inferno) |> g -> RGB[g[b/length(blocks)] for b in blocks]
-end
-
+# TODO: calculate and display the number of products placed
 """Creates a barchart of number of product facings per product."""
-function barchart(blocks, shelves, P_b, N_p_max, n_ps)
+function product_facings(blocks, shelves, P_b, N_p_max, n_ps)
     colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for _ in P_b[b]]
 
-    # Max facings
+    # Plot maximum number of facings.
     plt = bar(
         N_p_max,
         linewidth=0,
@@ -59,6 +60,7 @@ function barchart(blocks, shelves, P_b, N_p_max, n_ps)
         legend=:none,
         alpha=0.2)
 
+    # Plot number of facings placed on to the shelves.
     bar!(
         plt,
         [sum(n_ps[p, s] for s in shelves) for p in products],
@@ -69,5 +71,36 @@ function barchart(blocks, shelves, P_b, N_p_max, n_ps)
         legend=:none,
         background=:lightgray
     )
+
+    return plt
+end
+
+"""Block starting locations and widths."""
+function block_location_width(shelves, blocks, H_s, b_bs, x_bs, z_bs)
+    plt = plot(legend=:none, background=:lightgray)
+    y_s = vcat([0], cumsum(H_s))
+    block_colors = cgrad(:inferno)
+    for b in blocks
+        for s in shelves
+            if z_bs2[b, s] == 0
+                continue
+            end
+            color = block_colors[b/length(blocks)]
+            scatter!(
+                plt, [x_bs2[b, s]], [y_s[s]],
+                color=color)
+            plot!(
+                plt, [x_bs2[b, s], x_bs2[b, s] + b_bs2[b, s]], [y_s[s], y_s[s]],
+                color=color)
+        end
+    end
+    return plt
+end
+
+"""Bar chart of demand and unit margin (profit) per product."""
+function demand_and_profit(D_p, G_p)
+    plt = bar(D_p, alpha=0.7, label="Demand (D_p)", linewidth=0,
+        background=:lightgray, xlabel="Product (p)")
+    bar!(G_p, alpha=0.7, label="Unit Margin (G_p)", linewidth=0)
     return plt
 end
