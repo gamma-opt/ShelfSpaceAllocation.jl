@@ -26,14 +26,18 @@ Formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Spa
 -  $H_p$ -- Height of product $p$
 
 ## Objective
-$$\text{minimize} ∑_s o_s + ∑_p G_p e_p + ∑_{p,s} L_p H_s n_{p,s}$$
+The objective is formulated as multiobjective problem
 
-1) Minimizes empty shelf space
-2) Minimizes lost profit
-3) Places products at preferred heights
+$$\text{minimize} w_1 f_1 + w_2 f_2 + w_2 f_3,$$
 
-- TODO: change $H_s$ to $L_s$ (shelf level) or cumulative shelf height? 
-- TODO: multiobjective formulation?
+where the individual objectives are
+
+1)  $f_1=∑_s o_s$ -- Minimize the total empty shelf space
+2)  $f_2=∑_p G_p e_p$ -- Minimize total lost profit
+3)  $f_3=∑_{p,s} L_p L_s n_{p,s}$ -- Place products at preferred heights
+
+and $w_1, w_2, w_3>0$ are the weights.
+
 
 
 ## Basic Constraints
@@ -98,8 +102,6 @@ $$\begin{aligned}
 & ∑_b b_{b,s} ≤ W_s, ∀s
 \end{aligned}$$
 
-TODO: $W_p n_{p,s} ≤ b_{b,s}, ∀s,b,p∣p∈P_b$
-
 Defines an indicator variable $z_{b,s}$ which takes value $1$ if block is assigned on a shelf $s$, $0$ otherwise
 
 $$\begin{aligned}
@@ -143,13 +145,13 @@ $$z_{b,s+1}^f + z_{b,s} = z_{b,s+1} + z_{b,s}^l, ∀b,s∣s≤|S|-1$$
 
 $$∑_p n_{p,s} ≥ z_{b,s}, ∀b,s$$
 
-$$n_{p,s} ≤ N_p^{max} z_{b,s}, b,p,s∣p∈P_b$$
+$$n_{p,s} ≤ N_p^{max} z_{b,s}, ∀b,p,s∣p∈P_b$$
 
 ---
 
 Block starting location in mm on a shelf
 
-$$x_{b,s}≥0, b,s∣s∈S_m$$
+$$x_{b,s}≥0, ∀b,s$$
 
 $$x_{b,s} ≤ W_s z_{b,s}, ∀b,s$$
 
