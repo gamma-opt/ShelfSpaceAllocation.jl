@@ -53,7 +53,7 @@ The total weight of the products on shelf $s$ must be within the bounds
 
 $$M_s^{min} ≤ ∑_p M_p n_{p,s} ≤ M_s^{max}, ∀s$$
 
-Defines an indicator variable $y_{p,s}$ which takes value $1$ if product $p$ is allocated on shelf $s$, $0$ otherwise
+A binary variable which takes value $1$ if product $p$ is allocated on shelf $s$, $0$ otherwise
 
 $$\begin{aligned}
 & y_{p,s} ∈ \{0,1\}, & ∀p,s \\
@@ -85,7 +85,7 @@ $$\begin{aligned}
 & ∑_p W_p n_{p,s} + o_s = W_s, & ∀s
 \end{aligned}$$
 
-Defines an indicator variable which takes value $1$, if product is allocated to a shelf, $0$ otherwise
+A binary variable which takes value $1$, if product is allocated to a shelf, $0$ otherwise
 
 $$\begin{aligned}
 & y_p ∈ \{0,1\}, & ∀p \\
@@ -102,7 +102,7 @@ $$\begin{aligned}
 & ∑_b b_{b,s} ≤ W_s, ∀s
 \end{aligned}$$
 
-Defines an indicator variable $z_{b,s}$ which takes value $1$ if block is assigned on a shelf $s$, $0$ otherwise
+A binary variable which takes value $1$ if block is assigned on a shelf $s$, $0$ otherwise
 
 $$\begin{aligned}
 & z_{b,s}∈\{0,1\}, ∀b,s \\
@@ -119,8 +119,11 @@ $$\begin{aligned}
 
 ---
 
+A binary variable which takes value $1$ if shelf $s$ is the first shelf of a block $b$, $0$ otherwise
 
 $$z_{b,s}^f∈\{0,1\}, ∀b,s$$
+
+A binary variable which takes value $1$ if shelf $s$ is the last shelf of a block $b$, $0$ otherwise
 
 $$z_{b,s}^l∈\{0,1\}, ∀b,s$$
 
@@ -149,11 +152,13 @@ $$n_{p,s} ≤ N_p^{max} z_{b,s}, ∀b,p,s∣p∈P_b$$
 
 ---
 
-Block starting location in mm on a shelf
+Block starting location in mm on shelf $s$
 
 $$x_{b,s}≥0, ∀b,s$$
 
 $$x_{b,s} ≤ W_s z_{b,s}, ∀b,s$$
+
+A binary variable which takes value $1$ if block $b$ precedes block $b'$, $0$ otherwise
 
 $$w_{b,b'}∈\{0,1\}, ∀b,b'∣b≠b'$$
 
@@ -161,6 +166,8 @@ $$\begin{aligned}
 & x_{b,s} ≥ x_{b',s} + b_{b,s} - W_s (1 - w_{b,b'}), & ∀b,b',m∣b≠b' \\
 & x_{b',s} ≥ x_{b,s} + b_{b,s} - W_s w_{b,b'}, & ∀b,b',m∣b≠b'
 \end{aligned}$$
+
+Block starting location in mm on module $m$
 
 $$x_{b,m}≥0, ∀b,m$$
 
@@ -172,7 +179,7 @@ $$\begin{aligned}
 
 ---
 
-Defines an indicator variable which takes value $1$ if a block is assigned on a module, $0$ otherwise
+A binary variable which takes value $1$ if a block is assigned on a module, $0$ otherwise
 
 $$v_{b,m}∈\{0,1\}, ∀b,m$$
 
