@@ -24,6 +24,7 @@ Formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Spa
 -  $M_p$ -- Unit weight of product $p$
 -  $H_s$ -- Height of shelf $s$
 -  $H_p$ -- Height of product $p$
+-  $SL$ -- Slack, maximum difference in block starting points and between block max and min width
 
 ## Objective
 The objective is formulated as multiobjective problem
@@ -38,16 +39,21 @@ where the individual objectives are
 
 and $w_1, w_2, w_3>0$ are the weights.
 
-
-
 ## Basic Constraints
 Number of facings of product $p$ on shelf $s$
 
 $$n_{p,s} ∈ ℤ_{≥0}, ∀p,s$$
 
+A binary variable which takes value $1$, if product is  allocated to a shelf, $0$ otherwise
+
+$$\begin{aligned}
+& y_p ∈ \{0,1\}, & ∀p \\
+& ∑_p n_{p,s} ≥ y_{p}, & ∀p \\
+\end{aligned}$$
+
 The total number of facings of product $p$ must be withing the bounds
 
-$$N_p^{min} ≤ ∑_s n_{p,s} ≤ N_p^{max}, ∀p$$
+$$N_p^{min} y_p ≤ ∑_s n_{p,s} ≤ N_p^{max} y_p, ∀p$$
 
 The total weight of the products on shelf $s$ must be within the bounds
 
@@ -64,12 +70,14 @@ The height of product $p$ allocated on shelf $s$ must be less or equal to the sh
 
 $$y_{p,s} H_p ≤ H_s, ∀p,s$$
 
-The amount of product $p$ sold must equal to the minimum of the expected sales and demand
+The amount of product $p$ sold must be less or equal to the minimum of the expected sales and demand
 
 $$\begin{aligned}
 & s_p ≥ 0, & ∀p \\
-& s_p = \min\left(∑_s \frac{30}{R_p} P_{p,s} n_{p,s}, D_p\right), & ∀p
+& s_p ≤ \min\left(∑_s \frac{30}{R_p} P_{p,s} n_{p,s}, D_p\right), & ∀p
 \end{aligned}$$
+
+**NOTE**: Constraint of form $z≤\min(x,y)$ can be linearized by two constraints $z≤x$ and $z≤y$.
 
 The shortage of product $p$ is the mismatch between demand and on-shelf inventory
 
@@ -84,14 +92,6 @@ $$\begin{aligned}
 & o_s ≥ 0, & ∀s \\
 & ∑_p W_p n_{p,s} + o_s = W_s, & ∀s
 \end{aligned}$$
-
-A binary variable which takes value $1$, if product is allocated to a shelf, $0$ otherwise
-
-$$\begin{aligned}
-& y_p ∈ \{0,1\}, & ∀p \\
-& ∑_p n_{p,s} ≥ y_{p}, & ∀p \\
-\end{aligned}$$
-
 
 ## Block Constraints
 Width of block $b$ on shelf $s$
@@ -113,8 +113,8 @@ Block width on module
 
 $$\begin{aligned}
 & m_{b,m}≥0, & ∀b,m \\
-& b_{b,s} ≥ m_{b,m} - W_s (1 - z_{b,s}), & ∀b,m,s∣s∈S_m \\
-& b_{b,s} ≤ m_{b,m} + W_s (1 - z_{b,s}), & ∀b,m,s∣s∈S_m
+& b_{b,s} ≥ m_{b,m} - W_s (1 - z_{b,s}) - SL, & ∀b,m,s∣s∈S_m \\
+& b_{b,s} ≤ m_{b,m} + W_s (1 - z_{b,s}) + SL, & ∀b,m,s∣s∈S_m
 \end{aligned}$$
 
 ---
@@ -158,13 +158,15 @@ $$x_{b,s}≥0, ∀b,s$$
 
 $$x_{b,s} ≤ W_s z_{b,s}, ∀b,s$$
 
+$$x_{b,s} + b_{b,s} ≤ W_s, ∀b,s$$
+
 A binary variable which takes value $1$ if block $b$ precedes block $b'$, $0$ otherwise
 
 $$w_{b,b'}∈\{0,1\}, ∀b,b'∣b≠b'$$
 
 $$\begin{aligned}
-& x_{b,s} ≥ x_{b',s} + b_{b,s} - W_s (1 - w_{b,b'}), & ∀b,b',m∣b≠b' \\
-& x_{b',s} ≥ x_{b,s} + b_{b,s} - W_s w_{b,b'}, & ∀b,b',m∣b≠b'
+& x_{b,s} + W_s (1 - z_{b,s}) ≥ x_{b',s} + b_{b,s} - W_s (1 - w_{b,b'}), & ∀b,b',m∣b≠b' \\
+& x_{b',s} + W_s (1 - z_{b', s}) ≥ x_{b,s} + b_{b,s} - W_s w_{b,b'}, & ∀b,b',m∣b≠b'
 \end{aligned}$$
 
 Block starting location in mm on module $m$
@@ -172,8 +174,8 @@ Block starting location in mm on module $m$
 $$x_{b,m}≥0, ∀b,m$$
 
 $$\begin{aligned}
-& x_{b,m} ≥ x_{b,s} - W_s (1 - z_{b,s}), & ∀b,m,s∣s∈S_m \\
-& x_{b,m} ≤ x_{b,s} + W_s (1 - z_{b,s}), & ∀b,m,s∣s∈S_m
+& x_{b,m} ≥ x_{b,s} - W_s (1 - z_{b,s}) - SL, & ∀b,m,s∣s∈S_m \\
+& x_{b,m} ≤ x_{b,s} + W_s (1 - z_{b,s}) + SL, & ∀b,m,s∣s∈S_m
 \end{aligned}$$
 
 
@@ -186,47 +188,3 @@ $$v_{b,m}∈\{0,1\}, ∀b,m$$
 $$n_{p,s} ≤ N_p^{max} v_{b,m}, ∀p,b,m,s∣s∈S_m,p∈P_b$$
 
 $$∑_m v_{b,m} ≤ 1, ∀b$$
-
-
-## Linearization
-The constraint 
-
-$$z=\min{x, y}$$
-
-This can be implemented in a MIP model using a big-$M$ formulation
-
-$$\begin{aligned}
- &z \le x\\
- &z \le y\\
- &z \ge x - M\delta\\
- &z \ge y - M(1-\delta)\\
- &\delta \in \{0,1\}
-\end{aligned}$$
-
-where $M$ is a large enough constant.
-
-https://math.stackexchange.com/a/2564713/351414
-
----
-
-$$M≥\max(x, y)$$
-
----
-
-$$\begin{aligned}
-z &= s_p \\
-x &= ∑_s \frac{30}{R_p} P_{ps} n_{ps} \\
-y &= D_p
-\end{aligned}$$
-
-Upper bound for $x$
-
-$$\begin{aligned}
-x &= ∑_s c_{ps} n_{ps}, c_{ps}=\frac{30}{R_p} P_{ps} \\
-&≤ ∑_s \bar{c}_p n_{ps}, \bar{c}_p=\max_s c_{ps} \\
-&= \bar{c}_p ∑_s n_{ps}, ∑_s n_{ps} ≤ \bar{N}_p \\
-&≤ \bar{c}_p \bar{N}_p
-\end{aligned}$$
-
-Then
-$$M_p ≥ \max(\bar{c}_p \bar{N}_p, D_p) ≥ \max(x, y)$$
