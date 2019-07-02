@@ -68,6 +68,7 @@ M_s_max = shelf_data.Product_Max_Unit_Weight
 R_p = product_data.replenishment_interval
 L_s = shelf_data.Level
 H_p = product_data.height
+SL = 0
 
 
 # Model
@@ -80,35 +81,47 @@ model = Model()
 @variable(model, n_ps[products, shelves] ≥ 0, Int)
 
 # Objective
+w_1 = 0.5
+w_2 = 10.0
+w_3 = 0.1
 @objective(model, Min,
-    sum(o_s[s] for s in shelves) +
-    sum(G_p[p] * e_p[p] for p in products) +
-    sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves)
+    w_1 * sum(o_s[s] for s in shelves) +
+    w_2 * sum(G_p[p] * e_p[p] for p in products) +
+    w_3 * sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves)
 )
 
 # Constraints
-M = [max(maximum(30 / R_p[p] * P_ps[p, s] for s in shelves) * N_p_max[p], D_p[p]) for p in products]
-@variable(model, σ[products], Bin)
+# M = [max(maximum(30 / R_p[p] * P_ps[p, s] for s in shelves) * N_p_max[p], D_p[p]) for p in products]
+# @variable(model, σ[products], Bin)
+# @constraints(model, begin
+#     [p = products],
+#     s_p[p] ≤ sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves)
+#     [p = products],
+#     s_p[p] ≥ sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves) - M[p] * σ[p]
+#     [p = products],
+#     s_p[p] ≤ D_p[p]
+#     [p = products],
+#     s_p[p] ≥ D_p[p] - M[p] * (1 - σ[p])
+# end)
 @constraints(model, begin
     [p = products],
     s_p[p] ≤ sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves)
     [p = products],
-    s_p[p] ≥ sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves) - M[p] * σ[p]
-    [p = products],
     s_p[p] ≤ D_p[p]
-    [p = products],
-    s_p[p] ≥ D_p[p] - M[p] * (1 - σ[p])
 end)
 @constraint(model, [p = products],
     s_p[p] + e_p[p] == D_p[p])
+
+@variable(model, y_p[products], Bin)
 @constraint(model, [p = products],
-    N_p_min[p] ≤ sum(n_ps[p, s] for s in shelves) ≤ N_p_max[p])
+    sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
+@constraints(model, begin
+    [p = products], N_p_min[p] * y_p[p] ≤ sum(n_ps[p, s] for s in shelves)
+    [p = products], sum(n_ps[p, s] for s in shelves) ≤ N_p_max[p] * y_p[p]
+end)
+
 @constraint(model, [s = shelves],
     sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
-
-# @variable(model, y_p[products], Bin)
-# @constraint(model, [p = products],
-#     sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
 
 # Weight constraint
 # @constraint(model, [s = shelves],
@@ -130,9 +143,9 @@ end)
 @constraint(model, [s = shelves],
     sum(b_bs[b, s] for b in blocks) ≤ W_s[s])
 @constraint(model, [b = blocks, m = modules, s = S_m[m]],
-    b_bs[b, s] ≥ m_bm[b, m] - W_s[s] * (1 - z_bs[b, s]))
+    b_bs[b, s] ≥ m_bm[b, m] - W_s[s] * (1 - z_bs[b, s]) - SL)
 @constraint(model, [b = blocks, m = modules, s = S_m[m]],
-    b_bs[b, s] ≤ m_bm[b, m] + W_s[s] * (1 - z_bs[b, s]))
+    b_bs[b, s] ≤ m_bm[b, m] + W_s[s] * (1 - z_bs[b, s]) + SL)
 @constraint(model, [b = blocks, s = shelves],
     b_bs[b, s] ≤ W_s[s] * z_bs[b, s])
 # ---
@@ -158,21 +171,25 @@ end)
 @variable(model, x_bm[blocks, modules] ≥ 0)
 @variable(model, w_bb[blocks, blocks], Bin)
 @constraint(model, [b = blocks, b′ = filter(a->a≠b, blocks), s = shelves],
-    x_bs[b, s] ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
+    x_bs[b, s] + W_s[s] * (1 - z_bs[b, s]) ≥ x_bs[b′, s] + b_bs[b, s] - W_s[s] * (1 - w_bb[b, b′]))
 @constraint(model, [b = blocks, b′ = filter(a->a≠b, blocks), s = shelves],
-    x_bs[b′, s] ≥ x_bs[b, s] + b_bs[b, s] - W_s[s] * w_bb[b, b′])
+    x_bs[b′, s] + W_s[s] * (1 - z_bs[b′, s]) ≥ x_bs[b, s] + b_bs[b, s] - W_s[s] * w_bb[b, b′])
 @constraint(model, [b = blocks, m = modules, s = S_m[m]],
-    x_bm[b, m] ≥ x_bs[b, s] - W_s[s] * (1 - z_bs[b, s]))
+    x_bm[b, m] ≥ x_bs[b, s] - W_s[s] * (1 - z_bs[b, s]) - SL)
 @constraint(model, [b = blocks, m = modules, s = S_m[m]],
-    x_bm[b, m] ≤ x_bs[b, s] + W_s[s] * (1 - z_bs[b, s]))
+    x_bm[b, m] ≤ x_bs[b, s] + W_s[s] * (1 - z_bs[b, s]) + SL)
 @constraint(model, [b = blocks, s = shelves],
     x_bs[b, s] ≤ W_s[s] * z_bs[b, s])
+@constraint(model, [b = blocks, s = shelves],
+    x_bs[b, s] + b_bs[b, s] ≤ W_s[s])
 # ---
 @variable(model, v_bm[blocks, modules], Bin)
 @constraint(model, [b = blocks, m = modules, s = S_m[m], p = P_b[b]],
     n_ps[p, s] ≤ N_p_max[p] * v_bm[b, m])
 @constraint(model, [b = blocks],
     sum(v_bm[b, m] for m in modules) ≤ 1)
+
+println("Model is ready.")
 
 # Optimize
 optimize!(model, with_optimizer(Gurobi.Optimizer))
