@@ -7,12 +7,12 @@ function block_colorbar(blocks)
 end
 
 """Creates a planogram which visualizes the product placement on the shelves."""
-function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_bs, x_bs)
+function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+    # Initialize the plot
+    plt = plot(legend=:none, background=:lightgray)
+
     # Cumulative shelf heights
     y_s = vcat([0], cumsum(H_s))
-
-    # Initialize the plot
-    plt = plot(legend=:none)
 
     # Draw products
     rect(x, y, w, h) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
@@ -21,13 +21,13 @@ function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_b
         for s in shelves
             x = x_bs[b, s]
             for p in P_b[b]
-                stack = max(min(div(H_s[s], H_p[p]), product_data.max_stack[p]), 1)
+                stack = max(min(div(H_s[s], H_p[p]), SK_p[p]), 1)
                 for i in 1:n_ps[p, s]
                     y = 0
                     for j in 1:stack
                         plot!(plt, rect(x, y_s[s]+y, W_p[p], H_p[p]),
                               color=block_colors[b/length(blocks)])
-                        y += W_p[p]
+                        y += H_p[p]
                     end
                     x += W_p[p]
                 end
@@ -35,7 +35,7 @@ function planogram(products, shelves, blocks, P_b, H_s, W_p, W_s, n_ps, o_s, b_b
         end
     end
 
-    # Draw shelves - A line from (0, y[s]) to (W_s[s], y[s])
+    # Draw shelves
     for s in shelves
         plot!(plt, [0, W_s[s]], [y_s[s], y_s[s]],
               color=:black)
@@ -48,7 +48,7 @@ end
 
 # TODO: calculate and display the number of products placed
 """Creates a barchart of number of product facings per product."""
-function product_facings(blocks, shelves, P_b, N_p_max, n_ps)
+function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
     colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for _ in P_b[b]]
 
     # Plot maximum number of facings.
@@ -82,15 +82,15 @@ function block_location_width(shelves, blocks, H_s, b_bs, x_bs, z_bs)
     block_colors = cgrad(:inferno)
     for b in blocks
         for s in shelves
-            if z_bs2[b, s] == 0
+            if z_bs[b, s] == 0
                 continue
             end
             color = block_colors[b/length(blocks)]
             scatter!(
-                plt, [x_bs2[b, s]], [y_s[s]],
+                plt, [x_bs[b, s]], [y_s[s]],
                 color=color)
             plot!(
-                plt, [x_bs2[b, s], x_bs2[b, s] + b_bs2[b, s]], [y_s[s], y_s[s]],
+                plt, [x_bs[b, s], x_bs[b, s] + b_bs[b, s]], [y_s[s], y_s[s]],
                 color=color)
         end
     end
@@ -98,9 +98,10 @@ function block_location_width(shelves, blocks, H_s, b_bs, x_bs, z_bs)
 end
 
 """Bar chart of demand and unit margin (profit) per product."""
-function demand_and_profit(D_p, G_p)
+function demand_and_profit(D_p, G_p, s_p)
     plt = bar(D_p, alpha=0.7, label="Demand (D_p)", linewidth=0,
         background=:lightgray, xlabel="Product (p)")
-    bar!(G_p, alpha=0.7, label="Unit Margin (G_p)", linewidth=0)
+    bar!(plt, G_p, alpha=0.7, label="Unit Margin (G_p)", linewidth=0)
+    bar!(plt, s_p, alpha=0.7, label="Product sold (s_p)", linewidth=0, color=:red)
     return plt
 end
