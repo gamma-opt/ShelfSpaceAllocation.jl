@@ -1,14 +1,14 @@
 using Base.Filesystem
 using JuMP, Gurobi, Plots
-push!(LOAD_PATH, pwd())
+
+project_dir = dirname(@__DIR__)
+push!(LOAD_PATH, project_dir)
 using ShelfSpaceAllocation
 
-
 output_dir = "output"
-rm(output_dir, recursive=true)
+# rm(output_dir, recursive=true)
 mkdir(output_dir)
 
-project_dir = @__DIR__
 product_path = joinpath(project_dir, "data", "Anonymized space allocation data for 9900-shelf.csv")
 shelf_path = joinpath(project_dir, "data", "scenario_9900_shelves.csv")
 
