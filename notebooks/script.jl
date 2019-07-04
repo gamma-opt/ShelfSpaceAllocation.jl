@@ -12,15 +12,15 @@ mkdir(output_dir)
 product_path = joinpath(project_dir, "data", "Anonymized space allocation data for 9900-shelf.csv")
 shelf_path = joinpath(project_dir, "data", "scenario_9900_shelves.csv")
 
+parameters = load_parameters(product_path, shelf_path)
 (products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p
-) = load_inputs(product_path, shelf_path)
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL) = parameters
 
 println("Inputs are loaded.")
 
 model = ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
         L_p, P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p,
-        L_s, H_p; SL=0)
+        L_s, H_p, SL)
 
 println("Model is ready.")
 
@@ -31,13 +31,14 @@ optimizer = with_optimizer(
 )
 optimize!(model, optimizer)
 
-save_variables(model; filepath=joinpath(output_dir, "solution.json"))
+variables = extract_variables(model)
+save(parameters, variables; output_dir=output_dir)
 
-n_ps = value.(model.obj_dict[:n_ps])
-o_s = value.(model.obj_dict[:o_s])
-b_bs = value.(model.obj_dict[:b_bs])
-x_bs = value.(model.obj_dict[:x_bs])
-z_bs = value.(model.obj_dict[:z_bs])
+n_ps = variables[:n_ps]
+o_s = variables[:o_s]
+b_bs = variables[:b_bs]
+x_bs = variables[:x_bs]
+z_bs = variables[:z_bs]
 
 p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
 savefig(p1, joinpath(output_dir, "planogram.svg"))
