@@ -118,8 +118,10 @@ function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
     @constraint(model, [p = products],
         sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
     @constraints(model, begin
-        [p = products], N_p_min[p] * y_p[p] ≤ sum(n_ps[p, s] for s in shelves)
-        [p = products], sum(n_ps[p, s] for s in shelves) ≤ N_p_max[p] * y_p[p]
+        [p = products],
+        N_p_min[p] * y_p[p] ≤ sum(n_ps[p, s] for s in shelves)
+        [p = products],
+        sum(n_ps[p, s] for s in shelves) ≤ N_p_max[p] * y_p[p]
     end)
     @constraint(model, [s = shelves],
         sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
@@ -127,8 +129,8 @@ function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
         n_ps[p, s] ≤ N_p_max[p] * y_ps[p, s])
     @constraint(model, [p = products, s = shelves],
         y_ps[p, s] * H_p[p] ≤ H_s[s])
-    # @constraint(model, [s = shelves],
-    #     M_s_min[s] ≤ sum(M_p[p] * n_ps[p, s] for p in products) ≤ M_s_max[s])
+    @constraint(model, [p = products, s = shelves],
+        y_ps[p, s] * M_p[p] ≤ M_s_max[s])
 
     # --- Block constraints ---
     @constraint(model, [s = shelves, b = blocks],
