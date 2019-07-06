@@ -1,16 +1,24 @@
 using Base.Filesystem, Dates
 using JuMP, Gurobi, Plots
 
-project_dir = dirname(@__DIR__)
-push!(LOAD_PATH, project_dir)
+push!(LOAD_PATH, dirname(@__DIR__))
 using ShelfSpaceAllocation
 
-t = Dates.now()
-output_dir = "output_$t"
-mkdir(output_dir)
+# --- Arguments ---
 
-product_path = joinpath(project_dir, "data", "Anonymized space allocation data for 9900-shelf.csv")
-shelf_path = joinpath(project_dir, "data", "scenario_9900_shelves.csv")
+project_dir = @__DIR__
+time_limit = 10  # Seconds
+product_path = joinpath(@__DIR__, "data", "Anonymized space allocation data for 9900-shelf.csv")
+shelf_path = joinpath(@__DIR__, "data", "scenario_9900_shelves.csv")
+
+# ---
+
+t = Dates.now()
+output_dir = joinpath(@__DIR__, "output", "$(t)")
+mkpath(output_dir)
+
+println("Project Directory")
+println(output_dir)
 
 parameters = load_parameters(product_path, shelf_path)
 (products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
@@ -26,7 +34,7 @@ println("Model is ready.")
 
 optimizer = with_optimizer(
     Gurobi.Optimizer,
-    TimeLimit=10,
+    TimeLimit=time_limit,
     LogFile=joinpath(output_dir, "gurobi.log")
 )
 optimize!(model, optimizer)
