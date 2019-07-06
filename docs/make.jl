@@ -1,4 +1,7 @@
 using Documenter
+
+project_dir = dirname(@__DIR__)
+push!(LOAD_PATH, project_dir)
 using ShelfSpaceAllocation
 
 makedocs(
