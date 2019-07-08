@@ -83,7 +83,6 @@ function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
     @variable(model, o_s[shelves] ≥ 0)
     @variable(model, n_ps[products, shelves] ≥ 0, Int)
     @variable(model, y_p[products], Bin)
-    @variable(model, y_ps[products, shelves], Bin)
 
     # --- Block Variables ---
     @variable(model, b_bs[blocks, shelves] ≥ 0)
@@ -95,6 +94,15 @@ function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
     @variable(model, x_bm[blocks, modules] ≥ 0)
     @variable(model, w_bb[blocks, blocks], Bin)
     @variable(model, v_bm[blocks, modules], Bin)
+
+    # Height and weight constraints
+    for p in products
+        for s in shelves
+            if (H_p[p] > H_s[s]) | (M_p[p] > M_s_max[s])
+                fix(n_ps[p, s], 0, force=true)
+            end
+        end
+    end
 
     # --- Objective ---
     w_1 = 0.5
@@ -125,12 +133,6 @@ function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
     end)
     @constraint(model, [s = shelves],
         sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
-    @constraint(model, [p = products, s = shelves],
-        n_ps[p, s] ≤ N_p_max[p] * y_ps[p, s])
-    @constraint(model, [p = products, s = shelves],
-        y_ps[p, s] * H_p[p] ≤ H_s[s])
-    @constraint(model, [p = products, s = shelves],
-        y_ps[p, s] * M_p[p] ≤ M_s_max[s])
 
     # --- Block constraints ---
     @constraint(model, [s = shelves, b = blocks],
