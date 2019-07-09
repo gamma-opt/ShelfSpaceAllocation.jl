@@ -1,13 +1,11 @@
-using Base.Filesystem, Dates
-using JuMP, Gurobi, Plots
+using Dates, JuMP, Gurobi, Plots
 
 push!(LOAD_PATH, dirname(@__DIR__))
 using ShelfSpaceAllocation
 
 # --- Arguments ---
 
-project_dir = @__DIR__
-time_limit = 10  # Seconds
+time_limit = 10 # Seconds
 product_path = joinpath(@__DIR__, "data", "Anonymized space allocation data for 9900-shelf.csv")
 shelf_path = joinpath(@__DIR__, "data", "scenario_9900_shelves.csv")
 
@@ -35,7 +33,9 @@ println("Model is ready.")
 optimizer = with_optimizer(
     Gurobi.Optimizer,
     TimeLimit=time_limit,
-    LogFile=joinpath(output_dir, "gurobi.log")
+    LogFile=joinpath(output_dir, "gurobi.log"),
+    MIPFocus=3,
+    # Presolve=2,
 )
 optimize!(model, optimizer)
 
@@ -54,5 +54,5 @@ savefig(p1, joinpath(output_dir, "planogram.svg"))
 p2 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
 savefig(p2, joinpath(output_dir, "product_facings.svg"))
 
-p3 = block_location_width(shelves, blocks, H_s, b_bs, x_bs, z_bs)
+p3 = block_location_width(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
 savefig(p3, joinpath(output_dir, "block_location_width.svg"))

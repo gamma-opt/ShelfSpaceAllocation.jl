@@ -76,9 +76,18 @@ function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
 end
 
 """Block starting locations and widths."""
-function block_location_width(shelves, blocks, H_s, b_bs, x_bs, z_bs)
+function block_location_width(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
     plt = plot(legend=:none, background=:lightgray)
     y_s = vcat([0], cumsum(H_s))
+
+    # Draw shelves
+    for s in shelves
+        plot!(plt, [0, W_s[s]], [y_s[s], y_s[s]],
+              color=:gray, linestyle=:dot)
+    end
+    plot!(plt, [0, W_s[end]], [y_s[end], y_s[end]],
+          color=:gray, linestyle=:dash)
+
     block_colors = cgrad(:inferno)
     for b in blocks
         for s in shelves
@@ -88,7 +97,7 @@ function block_location_width(shelves, blocks, H_s, b_bs, x_bs, z_bs)
             color = block_colors[b/length(blocks)]
             scatter!(
                 plt, [x_bs[b, s]], [y_s[s]],
-                color=color)
+                color=color, markerstrokewidth=0, markersize = 2.5)
             plot!(
                 plt, [x_bs[b, s], x_bs[b, s] + b_bs[b, s]], [y_s[s], y_s[s]],
                 color=color)
