@@ -1,5 +1,4 @@
 module ShelfSpaceAllocation
-using Base.Filesystem
 using JuMP, CSV, JSON
 
 include("plotting.jl")
