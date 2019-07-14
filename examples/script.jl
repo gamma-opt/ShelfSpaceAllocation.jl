@@ -40,7 +40,8 @@ optimizer = with_optimizer(
 optimize!(model, optimizer)
 
 variables = extract_variables(model)
-save(parameters, variables; output_dir=output_dir)
+objectives = extract_objectives(parameters, variables)
+save(parameters, variables, objectives; output_dir=output_dir)
 
 n_ps = variables[:n_ps]
 o_s = variables[:o_s]
@@ -54,5 +55,11 @@ savefig(p1, joinpath(output_dir, "planogram.svg"))
 p2 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
 savefig(p2, joinpath(output_dir, "product_facings.svg"))
 
-p3 = block_location_width(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-savefig(p3, joinpath(output_dir, "block_location_width.svg"))
+p3 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+savefig(p3, joinpath(output_dir, "block_allocation.svg"))
+
+p4 = fill_amount(shelves, blocks, P_b, n_ps)
+savefig(p4, joinpath(output_dir, "fill_amount.svg"))
+
+p5 = fill_percentage(shelves, blocks, P_b, N_p_max, n_ps)
+savefig(p5, joinpath(output_dir, "fill_percentage.svg"))

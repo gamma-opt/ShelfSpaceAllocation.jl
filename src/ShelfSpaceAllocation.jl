@@ -2,8 +2,8 @@ module ShelfSpaceAllocation
 using JuMP, CSV, JSON
 
 include("plotting.jl")
-export load_parameters, save, extract_variables, ssap_model
-export block_colorbar, planogram, product_facings, block_location_width, demand_and_profit
+export load_parameters, save, extract_variables, extract_objectives, ssap_model
+export block_colorbar, planogram, product_facings, block_allocation, demand_and_profit, fill_amount, fill_percentage
 
 """Load sets, subsets and parameters from CSV files."""
 function load_parameters(product_path, shelf_path)
@@ -59,13 +59,33 @@ function extract_variables(model::Model)
 end
 
 """Save parameters and variables into JSON file."""
-function save(parameters, variables; output_dir=".")
+function save(parameters, variables, objectives; output_dir=".")
     open(joinpath(output_dir, "parameters.json"), "w") do io
         JSON.print(io, parameters)
     end
     open(joinpath(output_dir, "variables.json"), "w") do io
         JSON.print(io, variables)
     end
+    open(joinpath(output_dir, "objectives.json"), "w") do io
+        JSON.print(io, objectives)
+    end
+end
+
+"""Extract objective values for individual objectives."""
+function extract_objectives(parameters, variables)
+    o_s = variables[:o_s]
+    e_p = variables[:e_p]
+    n_ps = variables[:n_ps]
+    shelves = parameters[:shelves]
+    products = parameters[:products]
+    G_p = parameters[:G_p]
+    L_p = parameters[:L_p]
+    L_s = parameters[:L_s]
+    return (
+        empty_shelf_space = sum(o_s[s] for s in shelves),
+        profit_loss = sum(G_p[p] * e_p[p] for p in products),
+        height_placement_penalty = sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves)
+    )
 end
 
 """Mixed Integer Linear Program (MILP) formulation of the Shelf Space Allocation

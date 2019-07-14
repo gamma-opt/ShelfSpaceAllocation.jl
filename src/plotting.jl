@@ -49,7 +49,7 @@ end
 # TODO: calculate and display the number of products placed
 """Creates a barchart of number of product facings per product."""
 function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
-    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for _ in P_b[b]]
+    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
 
     # Plot maximum number of facings.
     plt = bar(
@@ -58,7 +58,10 @@ function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
         color=colors,
         background=:lightgray,
         legend=:none,
-        alpha=0.2)
+        alpha=0.3,
+        tickfontsize=6,
+        xticks=vcat([1], [last(P_b[b]) for b in blocks])
+    )
 
     # Plot number of facings placed on to the shelves.
     bar!(
@@ -76,7 +79,7 @@ function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
 end
 
 """Block starting locations and widths."""
-function block_location_width(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
     plt = plot(legend=:none, background=:lightgray)
     y_s = vcat([0], cumsum(H_s))
 
@@ -112,5 +115,33 @@ function demand_and_profit(D_p, G_p, s_p)
         background=:lightgray, xlabel="Product (p)")
     bar!(plt, G_p, alpha=0.7, label="Unit Margin (G_p)", linewidth=0)
     bar!(plt, s_p, alpha=0.7, label="Product sold (s_p)", linewidth=0, color=:red)
+    return plt
+end
+
+"""Plot the total number of allocated facings per product per block."""
+function fill_amount(shelves, blocks, P_b, n_ps)
+    pr = [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks]
+    plt = bar(
+        pr,
+        color=[cgrad(:inferno)[b/length(blocks)] for b in blocks],
+        xticks=1:1:size(blocks, 1),
+        legend=:none,
+        background=:lightgray
+    )
+    return plt
+end
+
+"""Plot the percentage of allocated facings of maximum facings per block."""
+function fill_percentage(shelves, blocks, P_b, N_p_max, n_ps)
+    pr = round.([sum(n_ps[p, s] for s in shelves for p in P_b[b])/
+                 sum(N_p_max[p] for p in P_b[b]) for b in blocks]; digits=2)
+    plt = bar(
+        pr,
+        color=[cgrad(:inferno)[b/length(blocks)] for b in blocks],
+        ylims=(0, 1),
+        xticks=1:1:size(blocks, 1),
+        legend=:none,
+        background=:lightgray
+    )
     return plt
 end
