@@ -40,6 +40,8 @@ where $f_1,f_2,f_3$ are the objectives and $w_1, w_2, w_3>0$ are the weights. Th
 3)  $f_3=∑_{p,s} L_p L_s n_{p,s}$ -- Product shelf height placement penalty. Preferres the placement of products with higher weight $L_p$ to lower shelves.
 
 ## Basic Constraints
+![](figures/planogram-basic.svg)
+
 Number of facings of product $p$ on shelf $s$
 
 $$n_{p,s} ∈ ℤ_{≥0}, ∀p,s$$
@@ -88,6 +90,8 @@ $$\begin{aligned}
 \end{aligned}$$
 
 ## Block Constraints
+![](figures/planogram.svg)
+
 The width of block $b$ on shelf $s$ must be larger or equal to the sum of the widths of products $P_b$ on the shelf $s$
 
 $$\begin{aligned}
