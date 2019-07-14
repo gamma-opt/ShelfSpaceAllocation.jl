@@ -110,6 +110,9 @@ $$\begin{aligned}
 & b_{b,s} ≤ W_s z_{b,s}, ∀b,s
 \end{aligned}$$
 
+!!! note
+    Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$.
+
 Block width on module $m$
 
 $$\begin{aligned}
