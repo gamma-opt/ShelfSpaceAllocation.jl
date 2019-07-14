@@ -5,4 +5,4 @@ A package containing an optimization model, written as *mixed-integer linear pro
 
 The optimization model is written using JuMP.jl, input parameters are loaded using CSV.jl, saving the results into files is implemented using JSON.jl and the plotting is implemented using Plots.jl. The optimizer backend is not specified in the package requirements, but for large instances, a commercial solver such as Gurobi or CPLEX is recommended
 
-This package is a part of a research project at the Systems Analysis Laboratory at Aalto University and its authors are *Jaan Tollander de Balsch* and *Fabricio Oliveira*.
+This package is a part of a research project at the Systems Analysis Laboratory at Aalto University, authored by *Fabricio Oliveira* and *Jaan Tollander de Balsch*.
