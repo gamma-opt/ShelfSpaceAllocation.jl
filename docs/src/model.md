@@ -54,7 +54,7 @@ The unit weight of product $p$ allocated on shelf $s$ must be less or equal to t
 
 $$n_{p,s}=0, ∀p,s∣M_p > M_s^{max}$$
 
-An indicator variable which takes value $1$, if a product is  allocated to a shelf, $0$ otherwise
+A decision variable which takes value $1$, if a product is  allocated to a shelf, $0$ otherwise
 
 $$\begin{aligned}
 & y_p ∈ \{0,1\}, & ∀p \\
@@ -123,11 +123,11 @@ $$\begin{aligned}
 
 ---
 
-An indicator variable which takes value $1$ if shelf $s$ is the first shelf of a block $b$, $0$ otherwise
+A decision variable which takes value $1$ if shelf $s$ is the first shelf of a block $b$, $0$ otherwise
 
 $$z_{b,s}^f∈\{0,1\}, ∀b,s$$
 
-An indicator variable which takes value $1$ if shelf $s$ is the last shelf of a block $b$, $0$ otherwise
+A decision variable which takes value $1$ if shelf $s$ is the last shelf of a block $b$, $0$ otherwise
 
 $$z_{b,s}^l∈\{0,1\}, ∀b,s$$
 
@@ -174,7 +174,7 @@ Block ending location must not exceed the shelf width
 
 $$x_{b,s} + b_{b,s} ≤ W_s, ∀b,s$$
 
-An indicator variable which takes value $1$ if block $b$ precedes block $b'$, $0$ otherwise. Notice that $b$ and $b'$ are mutually exclusive, i.e. $b≠b'$
+A decision variable which takes value $1$ if block $b$ precedes block $b'$, $0$ otherwise. Notice that $b$ and $b'$ are mutually exclusive, i.e. $b≠b'$
 
 $$\begin{aligned}
 & w_{b,b'}∈\{0,1\}, & ∀b,b' \\
