@@ -112,9 +112,26 @@ end
 """Bar chart of demand and sales per product."""
 function demand_and_sales(blocks, P_b, D_p, s_p)
     colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
-    plt = bar(D_p, alpha=0.3, label="Demand (D_p)", linewidth=0,
-        background=:lightgray, xlabel="Product (p)", color=colors)
-    bar!(plt, s_p, alpha=1.0, label="Product sold (s_p)", linewidth=0, color=colors)
+    plt = bar(
+        D_p,
+        alpha=0.3,
+        label="Demand (D_p)",
+        linewidth=0,
+        background=:lightgray,
+        xlabel="Product (p)",
+        color=colors,
+        tickfontsize=6,
+        xticks=vcat([1], [last(P_b[b]) for b in blocks]),
+        legend=:none
+    )
+    bar!(
+        plt,
+        s_p,
+        alpha=1.0,
+        label="Product sold (s_p)",
+        linewidth=0,
+        color=colors
+    )
     return plt
 end
 
