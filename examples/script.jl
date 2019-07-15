@@ -44,6 +44,7 @@ objectives = extract_objectives(parameters, variables)
 save(parameters, variables, objectives; output_dir=output_dir)
 
 n_ps = variables[:n_ps]
+s_p = variables[:s_p]
 o_s = variables[:o_s]
 b_bs = variables[:b_bs]
 x_bs = variables[:x_bs]
@@ -63,3 +64,6 @@ savefig(p4, joinpath(output_dir, "fill_amount.svg"))
 
 p5 = fill_percentage(shelves, blocks, P_b, N_p_max, n_ps)
 savefig(p5, joinpath(output_dir, "fill_percentage.svg"))
+
+p6 = demand_and_sales(blocks, P_b, D_p, s_p)
+savefig(p6, joinpath(output_dir, "demand_and_sales.svg"))

@@ -3,7 +3,7 @@ using JuMP, CSV, JSON
 
 include("plotting.jl")
 export load_parameters, save, extract_variables, extract_objectives, ssap_model
-export block_colorbar, planogram, product_facings, block_allocation, demand_and_profit, fill_amount, fill_percentage
+export block_colorbar, planogram, product_facings, block_allocation, demand_and_sales, fill_amount, fill_percentage
 
 """Load sets, subsets and parameters from CSV files."""
 function load_parameters(product_path, shelf_path)

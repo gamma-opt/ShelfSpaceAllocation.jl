@@ -109,12 +109,12 @@ function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
     return plt
 end
 
-"""Bar chart of demand and unit margin (profit) per product."""
-function demand_and_profit(D_p, G_p, s_p)
-    plt = bar(D_p, alpha=0.7, label="Demand (D_p)", linewidth=0,
-        background=:lightgray, xlabel="Product (p)")
-    bar!(plt, G_p, alpha=0.7, label="Unit Margin (G_p)", linewidth=0)
-    bar!(plt, s_p, alpha=0.7, label="Product sold (s_p)", linewidth=0, color=:red)
+"""Bar chart of demand and sales per product."""
+function demand_and_sales(blocks, P_b, D_p, s_p)
+    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
+    plt = bar(D_p, alpha=0.3, label="Demand (D_p)", linewidth=0,
+        background=:lightgray, xlabel="Product (p)", color=colors)
+    bar!(plt, s_p, alpha=1.0, label="Product sold (s_p)", linewidth=0, color=colors)
     return plt
 end
 
