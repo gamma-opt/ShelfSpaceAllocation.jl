@@ -8,7 +8,13 @@ makedocs(
     sitename = "ShelfSpaceAllocation",
     format = Documenter.HTML(),
     modules = [ShelfSpaceAllocation],
-    authors = "Jaan Tollander de Balsch, Fabricio Oliveira"
+    authors = "Jaan Tollander de Balsch, Fabricio Oliveira",
+    pages = Any[
+        "Home" => "index.md",
+        "model.md",
+        "plotting.md",
+        "library.md"
+    ]
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.

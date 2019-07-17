@@ -1,5 +1,5 @@
 # Model
-This section explains the mathematical formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Space Allocation Problem (SSAP).
+This section explains the mathematical formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Space Allocation Problem (SSAP). Ph.D. thesis by Maria Teresa [^2] contains a good introduction to the problem.
 
 ## Sets and Subsets
 Shelf space allocation problem consists of following sets and subsets:
@@ -12,7 +12,7 @@ Shelf space allocation problem consists of following sets and subsets:
 -  $S_m⊆S$ -- A **module** is a subset of shelves.
 
 ## Parameters
-Both products and shelves have a number of attributes associated with them. These attributes are also referred to as parameters since their values are given by the user. They are denoted using capital letters.
+Both products and shelves have several attributes associated with them. These attributes are also referred to as parameters since their values are given by the user. They are denoted using capital letters.
 
 -  $N_p^{min}$, $N_p^{max}$ -- The minimum and maximum number of facings for product $p$
 -  $G_p$ -- Unit profit of product $p$; used as shortage penalty (treated to be $\max\{0, G_p\}$
@@ -40,7 +40,7 @@ where $f_1,f_2,f_3$ are the objectives and $w_1, w_2, w_3>0$ are the weights. Th
 3)  $f_3=∑_{p,s} L_p L_s n_{p,s}$ -- Product shelf height placement penalty. Preferres the placement of products with higher weight $L_p$ to lower shelves.
 
 ## Basic Constraints
-![](figures/planogram-basic.svg)
+![](figures/model/planogram-basic.svg)
 
 Number of facings of product $p$ on shelf $s$
 
@@ -90,7 +90,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 ## Block Constraints
-![](figures/planogram.svg)
+![](figures/model/planogram.svg)
 
 The width of block $b$ on shelf $s$ must be larger or equal to the sum of the widths of products $P_b$ on the shelf $s$
 
@@ -111,7 +111,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 !!! note
-    Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$.
+    Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$. [^1]
 
 Block width on module $m$
 
@@ -203,3 +203,7 @@ $$n_{p,s} ≤ N_p^{max} v_{b,m}, ∀p,b,m,s∣s∈S_m,p∈P_b$$
 Block $b$ is assigned to only one module $m$
 
 $$∑_m v_{b,m} ≤ 1, ∀b$$
+
+## References
+[^1]: Williams, H. P. (2013). Model building in mathematical programming. John Wiley & Sons.
+[^2]: Teresa, M. (2015). The Retail Shelf Space Allocation Problem: New Optimization Methods Applied to a Supermarket Chain.
