@@ -1,17 +1,16 @@
 # Shelf Space Allocation
-![](docs/src/figures/planogram.svg)
+![](docs/src/figures/model/planogram.svg)
 
-This package implements a Mixed Integer Linear Programming (MILP) formulation that solves the Shelf Space Allocation Problem (SSAP). In SSAP, a set of products is placed on a set of shelves while optimizing for the objective without violation constraints. Both, constraints and the objective are partially design decisions. The implementation presented here is created in the context of retail stores.
+This package contains an optimization model, written as *mixed-integer linear program (MILP)*, for solving the *Shelf Space Allocation Problem (SSAP)* in the context of retail stores and utilities for loading input parameters from files, saving results into files and for visualizing results. The documentation covers the formulation of the optimization model in detail and how to interpret the results from the optimization.
 
-This package is a part of a research project in the Systems Analysis Laboratory at Aalto University, Finland. The authors of the package are *Jaan Tollander de Balsch*
-and *Fabricio Oliveira*.
+This package is a part of a research project at the Systems Analysis Laboratory at Aalto University, authored by *Fabricio Oliveira* and *Jaan Tollander de Balsch*.
 
 
 ## Dependencies
 This package depends on [Julia Language](https://julialang.org/) version 1.0. It also depends on the following Julia packages:
 
 - JuMP.jl -- Modeling language for mathematical optimization. Used for formulating the Shelf Space Allocation Problem (SSAP) as a Mixed Integer Linear Program (MILP).
-- CSV.jl -- Reading and writing input files in CSV format.
+- CSV.jl -- Reading input files in CSV format.
 - JSON.jl -- Reading and writing results from the optimization into JSON files.
 - Plots.jl -- For plotting the results as planograms and other plots. Allows saving plots into SVG files.
 
