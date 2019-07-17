@@ -53,11 +53,6 @@ function load_parameters(product_path, shelf_path)
     )
 end
 
-"""Extract optimized values from the model."""
-function extract_variables(model::Model)
-    return Dict(k => Array(value.(v)) for (k, v) in model.obj_dict)
-end
-
 """Save parameters and variables into JSON file."""
 function save(parameters, variables, objectives; output_dir=".")
     open(joinpath(output_dir, "parameters.json"), "w") do io
@@ -69,6 +64,11 @@ function save(parameters, variables, objectives; output_dir=".")
     open(joinpath(output_dir, "objectives.json"), "w") do io
         JSON.print(io, objectives)
     end
+end
+
+"""Extract optimized values from the model."""
+function extract_variables(model::Model)
+    return Dict(k => Array(value.(v)) for (k, v) in model.obj_dict)
 end
 
 """Extract objective values for individual objectives."""
