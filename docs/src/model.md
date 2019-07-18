@@ -1,5 +1,5 @@
 # Model
-This section explains the mathematical formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Space Allocation Problem (SSAP). Ph.D. thesis by Maria Teresa [^2] contains a good introduction to the problem.
+This section explains the mathematical formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Space Allocation Problem (SSAP). An introduction to the shelf space allocation problem is well covered by Maria Teresa in her Ph.D. thesis [^Teresa2015]. Modeling problems using mathematical programming including linear and integer programming are covered in [^Williams2013].
 
 ## Sets and Subsets
 Shelf space allocation problem consists of following sets and subsets:
@@ -29,15 +29,19 @@ Both products and shelves have several attributes associated with them. These at
 -  $SL$ -- Slack, maximum difference in block starting points and between block max and min width
 
 ## Objective
-The objective is formulated as a multiobjective problem
+In this model, the objective is a multi-objective problem using linear scalarization (i.e. weighted sum)
 
-$$\text{minimize} w_1 f_1 + w_2 f_2 + w_2 f_3,$$
+$$\min ∑_{i=1}^n w_i f_i$$
 
-where $f_1,f_2,f_3$ are the objectives and $w_1, w_2, w_3>0$ are the weights. The individual objectives are defined as:
+where $f_i$ are the objectives and $w_i>0$ are the weight parameters.
+
+The problem contains $n=3$ different individual objectives defined as:
 
 1)  $f_1=∑_s o_s$ -- The total empty shelf space
 2)  $f_2=∑_p G_p e_p$ -- Total profit loss from product shortage
 3)  $f_3=∑_{p,s} L_p L_s n_{p,s}$ -- Product shelf height placement penalty. Preferres the placement of products with higher weight $L_p$ to lower shelves.
+
+The weights are manually tuned such that the algorithm obtains satisfying solutions.
 
 ## Basic Constraints
 ![](figures/model/planogram-basic.svg)
@@ -111,7 +115,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 !!! note
-    Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$. [^1]
+    Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$.
 
 Block width on module $m$
 
@@ -151,9 +155,7 @@ $$\begin{aligned}
 
 If block $b$ is assigned on shelf $s$ then the total number of facings assigned to shelf $s$ must be at least one
 
-TODO: $p∈P_b$?
-
-$$∑_p n_{p,s} ≥ z_{b,s}, ∀b,s$$
+$$∑_{p∈P_b} n_{p,s} ≥ z_{b,s}, ∀b,s$$
 
 
 If block $b$ is not assignment on shelf $s$ then the number of facings of products in $P_b$ on shelf $s$ must be zero.
@@ -205,5 +207,6 @@ Block $b$ is assigned to only one module $m$
 $$∑_m v_{b,m} ≤ 1, ∀b$$
 
 ## References
-[^1]: Williams, H. P. (2013). Model building in mathematical programming. John Wiley & Sons.
-[^2]: Teresa, M. (2015). The Retail Shelf Space Allocation Problem: New Optimization Methods Applied to a Supermarket Chain.
+[^Teresa2015]: Teresa, M. (2015). The Retail Shelf Space Allocation Problem: New Optimization Methods Applied to a Supermarket Chain.
+
+[^Williams2013]: Williams, H. P. (2013). Model building in mathematical programming. John Wiley & Sons.

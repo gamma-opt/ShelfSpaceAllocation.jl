@@ -4,7 +4,7 @@ This section explains how to interpret the results of the optimization model.
 ## Planogram
 ![](figures/results/planogram.svg)
 
-Planogram visualizes the product placing on the shelves. [^1]
+Planogram visualizes the product placing on the shelves. [^Rouse2010]
 
 ## Block Allocation
 ![](figures/results/block_allocation.svg)
@@ -32,4 +32,4 @@ Fill amount visualizes the total amount of products facings $∑_{p∈P_b,s∈S}
 Fill percentage visualizes the relative amount of product facings allocated to the shelves per block. Calculated by dividing the absolute amount of product facing allocated per block by the number of products that could be allocated to the shelves per block if there were no products from other blocks.
 
 ## References
-[^1]: Rouse, M. (2010). What is planogram? Retrieved from https://whatis.techtarget.com/definition/planogram
+[^Rouse2010]: Rouse, M. (2010). What is planogram? Retrieved from [https://whatis.techtarget.com/definition/planogram](https://whatis.techtarget.com/definition/planogram)
