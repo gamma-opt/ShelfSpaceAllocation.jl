@@ -27,6 +27,7 @@ ssap_model
 -  $M_s^{min}$, $M_s^{max}$ -- The minimum and maximum unit weight on shelf $s$
 -  $W_s$ -- Width of shelf $s$
 -  $H_s$ -- Height of shelf $s$
+-  $L_p$ -- Shelf level, counted from bottom to top
 -  $SL$ -- Slack, maximum difference in block starting points and between block max and min width
 
 *Objective*
