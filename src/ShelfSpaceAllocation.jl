@@ -177,7 +177,7 @@ function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
         z_bs_l[b, end] == z_bs[b, end])
     # ---
     @constraint(model, [b = blocks, s = shelves],
-        sum(n_ps[p, s] for p in products) ≥ z_bs[b, s])
+        sum(n_ps[p, s] for p in P_b[b]) ≥ z_bs[b, s])
     @constraint(model, [b = blocks, s = shelves, p = P_b[b]],
         n_ps[p, s] ≤ N_p_max[p] * z_bs[b, s])
     # ---
