@@ -6,10 +6,12 @@ using ShelfSpaceAllocation
 
 makedocs(
     sitename = "ShelfSpaceAllocation",
-    format = Documenter.HTML(),
+    format = Documenter.HTML(
+        assets = ["assets/favicon.ico"]
+    ),
     modules = [ShelfSpaceAllocation],
     authors = "Jaan Tollander de Balsch, Fabricio Oliveira",
-    pages = Any[
+    pages = [
         "Home" => "index.md",
         "model.md",
         "plotting.md",
