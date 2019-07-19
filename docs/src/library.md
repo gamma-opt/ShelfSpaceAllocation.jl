@@ -1,7 +1,14 @@
 # Library
+Documentation for `ShelfSpaceAllocation.jl`'s interface.
+
+## Index
+```@index
+Pages = ["library.md"]
+```
+
 ## Model
 ```@docs
-ssap_model
+shelf_space_allocation_model
 ```
 
 *Sets and Subsets*
@@ -119,7 +126,7 @@ $$\begin{aligned}
 ## IO
 ```@docs
 load_parameters
-save
+save_results
 extract_variables
 extract_objectives
 ```

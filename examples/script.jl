@@ -24,9 +24,9 @@ parameters = load_parameters(product_path, shelf_path)
 
 println("Inputs are loaded.")
 
-model = ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
-        L_p, P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p,
-        L_s, H_p, SL)
+model = shelf_space_allocation_model(
+    products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL)
 
 println("Model is ready.")
 
@@ -41,7 +41,7 @@ optimize!(model, optimizer)
 
 variables = extract_variables(model)
 objectives = extract_objectives(parameters, variables)
-save(parameters, variables, objectives; output_dir=output_dir)
+save_results(parameters, variables, objectives; output_dir=output_dir)
 
 n_ps = variables[:n_ps]
 s_p = variables[:s_p]

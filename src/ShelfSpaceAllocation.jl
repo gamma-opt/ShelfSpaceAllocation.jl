@@ -2,11 +2,11 @@ module ShelfSpaceAllocation
 using JuMP, CSV, JSON
 
 include("plotting.jl")
-export load_parameters, save, extract_variables, extract_objectives, ssap_model
+export shelf_space_allocation_model, load_parameters, save_results, extract_variables, extract_objectives
 export block_colorbar, planogram, product_facings, block_allocation, demand_and_sales, fill_amount, fill_percentage
 
 """Load sets, subsets and parameters from CSV files."""
-function load_parameters(product_path, shelf_path)
+function load_parameters(product_path, shelf_path):: NamedTuple
     # Load data from CSV files. Data is read into a DataFrame
     product_data = CSV.read(product_path)
     shelf_data = CSV.read(shelf_path)
@@ -53,19 +53,6 @@ function load_parameters(product_path, shelf_path)
     )
 end
 
-"""Save parameters and variables into JSON file."""
-function save(parameters, variables, objectives; output_dir=".")
-    open(joinpath(output_dir, "parameters.json"), "w") do io
-        JSON.print(io, parameters)
-    end
-    open(joinpath(output_dir, "variables.json"), "w") do io
-        JSON.print(io, variables)
-    end
-    open(joinpath(output_dir, "objectives.json"), "w") do io
-        JSON.print(io, objectives)
-    end
-end
-
 """Extract optimized values from the model."""
 function extract_variables(model::Model)
     return Dict(k => Array(value.(v)) for (k, v) in model.obj_dict)
@@ -88,11 +75,25 @@ function extract_objectives(parameters, variables)
     )
 end
 
+"""Save parameters and variables into JSON file."""
+function save_results(parameters, variables, objectives; output_dir=".")
+    open(joinpath(output_dir, "parameters.json"), "w") do io
+        JSON.print(io, parameters)
+    end
+    open(joinpath(output_dir, "variables.json"), "w") do io
+        JSON.print(io, variables)
+    end
+    open(joinpath(output_dir, "objectives.json"), "w") do io
+        JSON.print(io, objectives)
+    end
+end
+
 """Mixed Integer Linear Program (MILP) formulation of the Shelf Space Allocation
 Problem (SSAP)."""
-function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
-        L_p, P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p,
-        L_s, H_p, SL):: Model
+function shelf_space_allocation_model(
+        products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
+        N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL;
+        w_1=0.5, w_2=10.0, w_3=0.1):: Model
     # Initialize the model
     model = Model()
 
@@ -124,9 +125,6 @@ function ssap_model(products, shelves, blocks, modules, P_b, S_m, G_p, H_s,
     end
 
     # --- Objective ---
-    w_1 = 0.5
-    w_2 = 10.0
-    w_3 = 0.1
     @objective(model, Min,
         w_1 * sum(o_s[s] for s in shelves) +
         w_2 * sum(G_p[p] * e_p[p] for p in products) +
