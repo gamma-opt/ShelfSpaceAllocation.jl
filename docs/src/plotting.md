@@ -1,5 +1,5 @@
 # Plotting
-This section explains how to interpret the results of the optimization model.
+This section illustrates the results of the optimization model using visualizations implemented with `Plots.jl`.
 
 ## Planogram
 ![](figures/results/planogram.svg)
