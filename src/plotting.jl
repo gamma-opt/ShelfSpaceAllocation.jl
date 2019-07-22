@@ -145,7 +145,7 @@ function fill_amount(shelves, blocks, P_b, n_ps)
         pr,
         color=[cgrad(:inferno)[b/length(blocks)] for b in blocks],
         xlabel=L"$b$",
-        ylabel=L"\sum_{p\in P_b,s\in S} n_{p,s}",
+        # ylabel=L"",
         xticks=1:1:size(blocks, 1),
         legend=:none,
         background=:lightgray
@@ -230,7 +230,7 @@ function fill_percentage(
         color=[cgrad(:inferno)[b/length(blocks)] for b in blocks],
         ylims=(0, 1),
         xlabel=L"$b$",
-        ylabel=L"\sum_{p\in P_b,s\in S} n_{p,s}/n_b^{max}",
+        # ylabel=L"",
         xticks=1:1:size(blocks, 1),
         legend=:none,
         background=:lightgray
