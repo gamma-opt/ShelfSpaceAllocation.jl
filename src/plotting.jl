@@ -9,7 +9,11 @@ end
 """Creates a planogram which visualizes the product placement on the shelves."""
 function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
     # Initialize the plot
-    plt = plot(legend=:none, background=:lightgray)
+    plt = plot(
+        legend=:none,
+        background=:lightgray,
+        size=(780, 400)
+    )
 
     # Cumulative shelf heights
     y_s = vcat([0], cumsum(H_s))
@@ -46,7 +50,6 @@ function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_p
     return plt
 end
 
-# TODO: calculate and display the number of products placed
 """Creates a barchart of number of product facings per product."""
 function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
     colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
@@ -62,7 +65,8 @@ function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
         legend=:none,
         alpha=0.3,
         tickfontsize=6,
-        xticks=vcat([1], [last(P_b[b]) for b in blocks])
+        xticks=vcat([1], [last(P_b[b]) for b in blocks]),
+        size=(780, 400)
     )
 
     # Plot number of facings placed on to the shelves.
@@ -80,7 +84,11 @@ end
 
 """Block starting locations and widths."""
 function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-    plt = plot(legend=:none, background=:lightgray)
+    plt = plot(
+        legend=:none,
+        background=:lightgray,
+        size=(780, 400)
+    )
     y_s = vcat([0], cumsum(H_s))
 
     # Draw shelves
@@ -124,7 +132,8 @@ function demand_and_sales(blocks, P_b, D_p, s_p)
         color=colors,
         tickfontsize=6,
         xticks=vcat([1], [last(P_b[b]) for b in blocks]),
-        legend=:none
+        legend=:none,
+        size=(780, 400)
     )
 
     # Plot products sold
