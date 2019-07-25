@@ -54,12 +54,12 @@ function load_parameters(product_path, shelf_path):: NamedTuple
 end
 
 """Extract optimized values from the model."""
-function extract_variables(model::Model)
+function extract_variables(model::Model):: Dict
     return Dict(k => Array(value.(v)) for (k, v) in model.obj_dict)
 end
 
 """Extract objective values for individual objectives."""
-function extract_objectives(parameters, variables)
+function extract_objectives(parameters, variables):: NamedTuple
     o_s = variables[:o_s]
     e_p = variables[:e_p]
     n_ps = variables[:n_ps]

@@ -7,7 +7,7 @@ function block_colorbar(blocks)
 end
 
 """Creates a planogram which visualizes the product placement on the shelves."""
-function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs):: Plots.Plot
     # Initialize the plot
     plt = plot(
         legend=:none,
@@ -51,7 +51,7 @@ function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_p
 end
 
 """Creates a barchart of number of product facings per product."""
-function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
+function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps):: Plots.Plot
     colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
 
     # Plot maximum number of facings.
@@ -83,7 +83,7 @@ function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
 end
 
 """Block starting locations and widths."""
-function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs):: Plots.Plot
     plt = plot(
         legend=:none,
         background=:lightgray,
@@ -118,7 +118,7 @@ function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
 end
 
 """Bar chart of demand and sales per product."""
-function demand_and_sales(blocks, P_b, D_p, s_p)
+function demand_and_sales(blocks, P_b, D_p, s_p):: Plots.Plot
     colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
 
     # Plot demand of products
@@ -148,7 +148,7 @@ function demand_and_sales(blocks, P_b, D_p, s_p)
 end
 
 """Plot the total number of allocated facings per product per block."""
-function fill_amount(shelves, blocks, P_b, n_ps)
+function fill_amount(shelves, blocks, P_b, n_ps):: Plots.Plot
     pr = [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks]
     plt = bar(
         pr,
@@ -223,7 +223,7 @@ end
 function fill_percentage(
         n_ps_sol, products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
         P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-        H_p, optimizer)
+        H_p, optimizer):: Plots.Plot
     pr = [sum(n_ps_sol[p, s] for p in P_b[b] for s in shelves) for b in blocks]
     pr_max = []
     for b in blocks
