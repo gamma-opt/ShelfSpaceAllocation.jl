@@ -4,13 +4,13 @@ push!(LOAD_PATH, dirname(@__DIR__))
 using ShelfSpaceAllocation
 
 """Heuristic algorithm"""
-function fix_and_relax(
+function relax_and_fix(
         products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
         P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
         H_p, SL, block_partitions, optimizer; w_1=0.5, w_2=10.0, w_3=0.1)
     # Remember fixed blocks and values
     relaxed_blocks = block_partitions[2:end]
-    # TODO: test fixign related n_ps variables too
+    # TODO: test fixing related n_ps variables too for faster runtime
     fixed_blocks = []
     z_bs = []
     x_bs = []
@@ -98,7 +98,7 @@ optimizer = with_optimizer(
     # Presolve=2,
 )
 block_partitions = [[7, 1], [6, 8], [2, 4], [9, 3, 5]]
-model = fix_and_relax(
+model = relax_and_fix(
     products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
     P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
     H_p, SL, block_partitions, optimizer; w_1=0.5, w_2=10.0, w_3=0.1)
