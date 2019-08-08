@@ -1,5 +1,20 @@
 # Model
-This section explains the mathematical formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Space Allocation Problem (SSAP). An introduction to the shelf space allocation problem is well covered by Maria Teresa in her Ph.D. thesis [^Teresa2015]. Modeling problems using mathematical programming including linear and integer programming are covered in [^Williams2013].
+This section explains the mathematical formulation of the Mixed Integer Linear Program (MILP) for solving the Shelf Space Allocation Problem (SSAP). An introduction to the shelf space allocation problem is well covered by Maria Teresa in her Ph.D. thesis [^Teresa2015]. Especially, chapters 1.3 and 3 are recommended reading as they relate to the model presented here. Modeling problems using mathematical programming including linear and integer programming are covered in [^Williams2013].
+
+## Overview
+The objective of *shelf space allocation model* presented here is to minimize losses while taking into account consumer demand for products, minimize empty space on shelves and place products at preferred heights. The model is tailored towards smaller retail stores for which the shelf space accounts for a large portion of the total inventory space.
+
+The model also contains different types of constraints:
+
+* Integrality constraints -- The number of products allocated to each shelf must be integral.
+
+* Physical constraints -- Constraints limiting the physical dimensions, e.g. width, height, and weight, of the products on the shelves.
+
+* Control constraints -- Constraints which can be controlled by changing parameters values, such as the minimum number of product facings for a particular product or the preferred height placement for a product.
+
+* Block constraints -- Constraints products which belong to the same category to be placed together in rectangular shapes.
+
+The output values from the optimization are used to produce a *planogram*, which is a visualization of the product placement on to the shelves.
 
 ## Sets and Subsets
 Shelf space allocation problem consists of following sets and subsets:
@@ -59,7 +74,7 @@ The unit weight of product $p$ allocated on shelf $s$ must be less or equal to t
 
 $$n_{p,s}=0, ∀p,s∣M_p > M_s^{max}$$
 
-A decision variable which takes value $1$, if a product is  allocated to a shelf, $0$ otherwise
+A decision variable which takes value $1$, if a product is allocated to a shelf, $0$ otherwise
 
 $$\begin{aligned}
 & y_p ∈ \{0,1\}, & ∀p \\
@@ -78,7 +93,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 !!! note
-    The constraint of the form $z≤\min(x,y)$ can be linearized by replacing it with two constraints $z≤x$ and $z≤y$.
+ The constraint of the form $z≤\min(x,y)$ can be linearized by replacing it with two constraints $z≤x$ and $z≤y$.
 
 The shortage of product $p$ is the mismatch between demand and on-shelf inventory
 
@@ -116,7 +131,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 !!! note
-    Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$.
+ Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$.
 
 Block width on module $m$
 
