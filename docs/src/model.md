@@ -93,7 +93,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 !!! note
- The constraint of the form $z≤\min(x,y)$ can be linearized by replacing it with two constraints $z≤x$ and $z≤y$.
+    The constraint of the form $z≤\min(x,y)$ can be linearized by replacing it with two constraints $z≤x$ and $z≤y$.
 
 The shortage of product $p$ is the mismatch between demand and on-shelf inventory
 
@@ -131,7 +131,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 !!! note
- Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$.
+    Indicator variable $σ$ is a binary variable which is forced to take value $1$ when $x>0$, otherwise $0$, by the constraint $x≤Mσ$ where $M$ is a constant coefficient representing a known upper bound for $x$.
 
 Block width on module $m$
 
