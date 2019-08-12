@@ -11,6 +11,11 @@ Definitions in the context of linear programming heuristics.
 ## Relax-and-Fix
 The main design decision for relax-and-fix heuristic is choosing which variables will be relaxed. For shelf space allocation model the main options are the integer variables for number of facings $n_{p,s}$ and binary variables for block-shelf allocation $z_{b,s}$, $z_{b,s}^f$ and $z_{b,s}^l$. Testing indicated that relaxation of block-shelf allocation variables is a better choice because the reduction of computational time by all relaxing variables for the number of facings was insignificant.
 
+Block-shelf allocation variables have two indices, blocks $b$ and shelves $s$. The most logical choice is to partition the variables by the blocks. This is done by partitioning the set of blocks $B$ into $n$ disjoint subsets $B_1, B_2, ..., B_n$. This also determines the order in which the variables are relaxed. Partitioning affects the runtime and goodness of the heuristic solution. The optimal way to partition is still unknown to us and partitioning policy is a user decision.
+
+!!! example
+    For example, $B_1$ could be partition to contain two blocks that are predicted to have most items allocated to the shelves, then partition $B_2$ to contain two blocks that are predicted to have second-most items allocated to the shelves and so forth.
+
 Relax-and-fix heuristic. Start the iteration counter from $i=1$. 
 
 1) *Relax*. Solve the relaxed shelf space allocation model where
@@ -25,12 +30,6 @@ $$\begin{aligned}
 3) If iteration counter is $i=n$ return the solution. Otherwise, increment the iteration counter $i$ by one and repeat from step 1.
 
 The block-shelf variables will be relaxed by a subset of blocks at a time. This transforms the original problem into one where all the blocks are not being allocated at the same time but one subset of blocks at a time.
-
-Partitioning set of blocks $B$ into $n$ disjoint subsets $B_1, B_2, ..., B_n$ determines the order in which variables are relaxed. Partitioning affects the runtime and goodness of the heuristic solution. The optimal way to partition is still unknown to us and partitioning policy is a user decision.
-
-!!! example
-    For example, $B_1$ could be partition to contain two blocks that are predicted to have most items allocated to the shelves, then partition $B_2$ to contain two blocks that are predicted to have second-most items allocated to the shelves and so forth.
-
 
 ## Fix-and-Optimize
 !!! note
