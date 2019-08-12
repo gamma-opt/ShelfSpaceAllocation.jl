@@ -6,13 +6,13 @@ The objective of *shelf space allocation model* presented here is to minimize lo
 
 The model also contains different types of constraints:
 
-* Integrality constraints -- The number of products allocated to each shelf must be integral.
+* *Integrality constraints* -- The number of products allocated to each shelf must be integral.
 
-* Physical constraints -- Constraints limiting the physical dimensions, e.g. width, height, and weight, of the products on the shelves.
+* *Physical constraints* -- Constraints limiting the physical dimensions, e.g. width, height, and weight, of the products on the shelves.
 
-* Control constraints -- Constraints which can be controlled by changing parameters values, such as the minimum number of product facings for a particular product or the preferred height placement for a product.
+* *Control constraints* -- Constraints which can be controlled by changing parameters values, such as the minimum number of product facings for a particular product or the preferred height placement for a product.
 
-* Block constraints -- Constraints products which belong to the same category to be placed together in rectangular shapes.
+* *Block constraints* -- Constraints products which belong to the same category to be placed together in rectangular shapes.
 
 The output values from the optimization are used to produce a *planogram*, which is a visualization of the product placement on to the shelves.
 
@@ -45,19 +45,18 @@ Both products and shelves have several attributes associated with them. These at
 -  $SL$ -- Slack, maximum difference in block starting points and between block max and min width
 
 ## Objective
-In this model, the objective is a multi-objective problem using linear scalarization (i.e. weighted sum)
+The shelf space allocation model contains multiple objectives. The multi-objective formulation is reduced into singe objective using linear scalarization, i.e. weighted sum
 
 $$\min ∑_{i=1}^n w_i f_i$$
 
-where $f_i$ are the objectives and $w_i>0$ are the weight parameters.
+where $f_i$ are the objectives and $w_i>0$ are the weight parameters. There are $n=3$ different individual objectives defined as:
 
-The problem contains $n=3$ different individual objectives defined as:
-
-1)  $f_1=∑_s o_s$ -- The total empty shelf space
-2)  $f_2=∑_p G_p e_p$ -- Total profit loss from product shortage
+1)  $f_1=∑_s o_s$ -- The total empty shelf space.
+2)  $f_2=∑_p G_p e_p$ -- Total profit loss from product shortage.
 3)  $f_3=∑_{p,s} L_p L_s n_{p,s}$ -- Product shelf height placement penalty. Preferres the placement of products with higher weight $L_p$ to lower shelves.
 
-The weights are manually tuned such that the algorithm obtains satisfying solutions.
+!!! note
+    Currently, JuMP doesn't support multi-objective optimization, and thus the weights are manually tuned such that the algorithm obtains satisfying solutions. However, solvers such as Gurobi have capabilities for multi-objective optimization and using them should be considered in the future.
 
 ## Basic Constraints
 ![](figures/model/planogram-basic.svg)
