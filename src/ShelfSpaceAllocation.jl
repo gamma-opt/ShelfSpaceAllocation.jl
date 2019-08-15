@@ -3,7 +3,7 @@ using JuMP, CSV, JSON
 
 include("plotting.jl")
 export shelf_space_allocation_model, load_parameters, save_results, extract_variables, extract_objectives
-export block_colorbar, planogram, product_facings, block_allocation, demand_and_sales, fill_amount, fill_percentage
+export planogram, product_facings, block_allocation, demand_and_sales, fill_amount, fill_percentage
 
 """Load sets, subsets and parameters from CSV files."""
 function load_parameters(product_path, shelf_path):: NamedTuple

@@ -1,10 +1,6 @@
 using Plots, JuMP, LaTeXStrings
 
-"""Plot colors for different blocks.
-source: https://github.com/JuliaPlots/ExamplePlots.jl/blob/master/notebooks/cgrad.ipynb"""
-function block_colorbar(blocks)
-    return cgrad(:inferno) |> g -> RGB[g[b/length(blocks)] for b in blocks]
-end
+const block_colors = cgrad(:inferno)
 
 """Creates a planogram which visualizes the product placement on the shelves."""
 function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs):: Plots.Plot
@@ -20,7 +16,6 @@ function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_p
 
     # Draw products
     rect(x, y, w, h) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
-    block_colors = cgrad(:inferno)
     for b in blocks
         for s in shelves
             x = x_bs[b, s]
@@ -67,7 +62,6 @@ function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs):: Plots.P
     plot!(plt, [0, W_s[end]], [y_s[end], y_s[end]],
           color=:gray, linestyle=:dash)
 
-    block_colors = cgrad(:inferno)
     for b in blocks
         for s in shelves
             if z_bs[b, s] == 0
@@ -87,7 +81,7 @@ end
 
 """Creates a barchart of number of product facings per product."""
 function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps):: Plots.Plot
-    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
+    colors = [block_colors[b/length(blocks)] for b in blocks for p in P_b[b]]
 
     # Plot maximum number of facings.
     plt = bar(
@@ -119,7 +113,7 @@ end
 
 """Bar chart of demand and sales per product."""
 function demand_and_sales(blocks, P_b, D_p, s_p):: Plots.Plot
-    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
+    colors = [block_colors[b/length(blocks)] for b in blocks for p in P_b[b]]
 
     # Plot demand of products
     plt = bar(
@@ -152,7 +146,7 @@ function fill_amount(shelves, blocks, P_b, n_ps):: Plots.Plot
     pr = [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks]
     plt = bar(
         pr,
-        color=[cgrad(:inferno)[b/length(blocks)] for b in blocks],
+        color=[block_colors[b/length(blocks)] for b in blocks],
         xlabel=L"$b$",
         # ylabel=L"",
         xticks=1:1:size(blocks, 1),
@@ -236,7 +230,7 @@ function fill_percentage(
 
     plt = bar(
         pr ./ pr_max,
-        color=[cgrad(:inferno)[b/length(blocks)] for b in blocks],
+        color=[block_colors[b/length(blocks)] for b in blocks],
         ylims=(0, 1),
         xlabel=L"$b$",
         # ylabel=L"",
