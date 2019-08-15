@@ -50,38 +50,6 @@ function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_p
     return plt
 end
 
-"""Creates a barchart of number of product facings per product."""
-function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps):: Plots.Plot
-    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
-
-    # Plot maximum number of facings.
-    plt = bar(
-        N_p_max,
-        xlabel=L"$p$",
-        ylabel=L"$n_{p,s}$",
-        linewidth=0,
-        color=colors,
-        background=:lightgray,
-        legend=:none,
-        alpha=0.3,
-        tickfontsize=6,
-        xticks=vcat([1], [last(P_b[b]) for b in blocks]),
-        size=(780, 400)
-    )
-
-    # Plot number of facings placed on to the shelves.
-    bar!(
-        plt,
-        [sum(n_ps[p, s] for s in shelves) for p in products],
-        color=colors,
-        linewidth=0,
-        legend=:none,
-        background=:lightgray
-    )
-
-    return plt
-end
-
 """Block starting locations and widths."""
 function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs):: Plots.Plot
     plt = plot(
@@ -114,6 +82,38 @@ function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs):: Plots.P
                 color=color)
         end
     end
+    return plt
+end
+
+"""Creates a barchart of number of product facings per product."""
+function product_facings(products, shelves, blocks, P_b, N_p_max, n_ps):: Plots.Plot
+    colors = [cgrad(:inferno)[b/length(blocks)] for b in blocks for p in P_b[b]]
+
+    # Plot maximum number of facings.
+    plt = bar(
+        N_p_max,
+        xlabel=L"$p$",
+        ylabel=L"$n_{p,s}$",
+        linewidth=0,
+        color=colors,
+        background=:lightgray,
+        legend=:none,
+        alpha=0.3,
+        tickfontsize=6,
+        xticks=vcat([1], [last(P_b[b]) for b in blocks]),
+        size=(780, 400)
+    )
+
+    # Plot number of facings placed on to the shelves.
+    bar!(
+        plt,
+        [sum(n_ps[p, s] for s in shelves) for p in products],
+        color=colors,
+        linewidth=0,
+        legend=:none,
+        background=:lightgray
+    )
+
     return plt
 end
 
