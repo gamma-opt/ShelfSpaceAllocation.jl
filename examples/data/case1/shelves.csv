@@ -1,4 +1,4 @@
-Module,id,Level,Total_Width,Total_Height,Total_Length,Product_Min_Unit_Weight,Product_Max_Unit_Weight
+module,id,level,total_width,total_height,total_length,product_min_unit_weight,product_max_unit_weight
 SK6C_21,1524647949185,1,9900,310,800,4,30
 SK6C_21,1524647949185,2,9900,365,800,3,30
 SK6C_21,1524647949185,3,9900,400,680,0,15

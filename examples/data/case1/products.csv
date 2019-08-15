@@ -1,4 +1,4 @@
-product_id,width,height,length,ItemNetWeightKg,monthly_demand,replenishment_interval,price,unit_margin,blocking_field,min_facing,max_facing,max_stack,up_down_order_cr,block_order_cr
+product_id,width,height,depth,weight,monthly_demand,replenishment_interval,price,unit_margin,blocking_field,min_facing,max_facing,max_stack,up_down_order_criteria,block_order_criteria
 34542,70,35.00,70.00,0.08,55.74,30.00,1.19,0.60,371,0.00,5.00,6.00,0.08,1.00
 34536,70,35.00,70.00,0.08,96.20,30.00,1.21,0.62,371,0.00,5.00,6.00,0.08,1.00
 34541,70,35.00,70.00,0.08,79.24,30.00,1.19,0.62,371,0.00,5.00,6.00,0.08,1.00

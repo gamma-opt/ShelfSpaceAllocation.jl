@@ -21,7 +21,7 @@ function load_parameters(product_path, shelf_path):: NamedTuple
     blocks = 1:size(P_b, 1)
 
     # Modules
-    mds = shelf_data.Module
+    mds = shelf_data.module
     S_m = [collect(shelves)[mds .== md] for md in unique(mds)]
     modules = 1:size(S_m, 1)
 
@@ -34,19 +34,19 @@ function load_parameters(product_path, shelf_path):: NamedTuple
         P_b = P_b,
         S_m = S_m,
         G_p = product_data.unit_margin,
-        H_s = shelf_data.Total_Height,
-        L_p = product_data.up_down_order_cr,
-        P_ps = transpose(shelf_data.Total_Length) ./ product_data.length,
+        H_s = shelf_data.total_height,
+        L_p = product_data.up_down_order_criteria,
+        P_ps = transpose(shelf_data.total_length) ./ product_data.depth,
         D_p = product_data.monthly_demand,
         N_p_min = product_data.min_facing,
         N_p_max = product_data.max_facing,
         W_p = product_data.width,
-        W_s = shelf_data.Total_Width,
-        M_p = product_data.ItemNetWeightKg,
-        M_s_min = shelf_data.Product_Min_Unit_Weight,
-        M_s_max = shelf_data.Product_Max_Unit_Weight,
+        W_s = shelf_data.total_width,
+        M_p = product_data.weight,
+        M_s_min = shelf_data.product_min_unit_weight,
+        M_s_max = shelf_data.product_max_unit_weight,
         R_p = product_data.replenishment_interval,
-        L_s = shelf_data.Level,
+        L_s = shelf_data.level,
         H_p = product_data.height,
         SK_p = product_data.max_stack,
         SL = 0

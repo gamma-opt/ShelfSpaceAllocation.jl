@@ -68,9 +68,10 @@ end
 # --- Arguments ---
 
 time_limit = 3*60 # Seconds
-product_path = joinpath(@__DIR__, "data", "Anonymized space allocation data for 9900-shelf.csv")
-shelf_path = joinpath(@__DIR__, "data", "scenario_9900_shelves.csv")
-output_dir = joinpath(@__DIR__, "output_heuristics", string(Dates.now()))
+case = "case1"
+product_path = joinpath(@__DIR__, "data", case, "products.csv")
+shelf_path = joinpath(@__DIR__, "data", case, "shelves.csv")
+output_dir = joinpath(@__DIR__, "output", case, string(Dates.now()))
 
 # ---
 
