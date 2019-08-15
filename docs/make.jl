@@ -16,6 +16,7 @@ makedocs(
         "guide.md",
         "model.md",
         "plotting.md",
+        "io.md",
         "heuristics.md",
         "library.md"
     ]
