@@ -22,11 +22,6 @@ Each `products.csv` file contains following attributes:
 - `max_facing`
 - `max_stack`
 - `up_down_order_criteria`
-- `block_order_criteria`
-- `sku_order_criteria_1`
-- `sku_order_criteria_2`
-- `sku_order_criteria_3`
-- `sku_order_criteria_4`
 
 Each `shelves.csv` file contains following attributes:
 
