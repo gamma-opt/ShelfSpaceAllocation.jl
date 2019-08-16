@@ -85,13 +85,13 @@ z_bs = variables[:z_bs]
 p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
 savefig(p1, joinpath(output_dir, "planogram.svg"))
 
-@info "Plotting product facings"
-p2 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
-savefig(p2, joinpath(output_dir, "product_facings.svg"))
-
 @info "Plotting block allocation"
-p3 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-savefig(p3, joinpath(output_dir, "block_allocation.svg"))
+p2 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+savefig(p2, joinpath(output_dir, "block_allocation.svg"))
+
+@info "Plotting product facings"
+p3 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
+savefig(p3, joinpath(output_dir, "product_facings.svg"))
 
 @info "Plotting fill amount"
 p4 = fill_amount(shelves, blocks, P_b, n_ps)
