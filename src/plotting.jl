@@ -12,7 +12,7 @@ function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_p
     )
 
     # Cumulative shelf heights
-    y_s = vcat([0], cumsum(H_s))
+    y_s = vcat([0], cumsum([H_s[s] for s in shelves]))
 
     # Draw products
     rect(x, y, w, h) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
@@ -24,7 +24,7 @@ function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_p
                 for i in 1:n_ps[p, s]
                     y = 0
                     for j in 1:stack
-                        plot!(plt, rect(x, y_s[s]+y, W_p[p], H_p[p]),
+                        plot!(plt, rect(x, y_s[s-shelves[1]+1]+y, W_p[p], H_p[p]),
                               color=block_colors[b/length(blocks)])
                         y += H_p[p]
                     end
@@ -36,13 +36,18 @@ function planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_p
 
     # Draw shelves
     for s in shelves
-        plot!(plt, [0, W_s[s]], [y_s[s], y_s[s]],
+        plot!(plt, [0, W_s[s]], [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
               color=:black)
     end
-    plot!(plt, [0, W_s[end]], [y_s[end], y_s[end]],
+    plot!(plt, [0, W_s[shelves[end]]], [y_s[end], y_s[end]],
           color=:black, linestyle=:dash)
 
     return plt
+end
+
+"""Create a planogram for each module."""
+function planogram(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+     return [planogram(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs) for shelves′ in S_m]
 end
 
 """Block starting locations and widths."""
@@ -52,14 +57,14 @@ function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs):: Plots.P
         background=:lightgray,
         size=(780, 400)
     )
-    y_s = vcat([0], cumsum(H_s))
+    y_s = vcat([0], cumsum([H_s[s] for s in shelves]))
 
     # Draw shelves
     for s in shelves
-        plot!(plt, [0, W_s[s]], [y_s[s], y_s[s]],
+        plot!(plt, [0, W_s[s]], [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
               color=:gray, linestyle=:dot)
     end
-    plot!(plt, [0, W_s[end]], [y_s[end], y_s[end]],
+    plot!(plt, [0, W_s[shelves[end]]], [y_s[end], y_s[end]],
           color=:gray, linestyle=:dash)
 
     for b in blocks
@@ -69,14 +74,20 @@ function block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs):: Plots.P
             end
             color = block_colors[b/length(blocks)]
             scatter!(
-                plt, [x_bs[b, s]], [y_s[s]],
+                plt, [x_bs[b, s]], [y_s[s-shelves[1]+1]],
                 color=color, markerstrokewidth=0, markersize = 2.5)
             plot!(
-                plt, [x_bs[b, s], x_bs[b, s] + b_bs[b, s]], [y_s[s], y_s[s]],
+                plt, [x_bs[b, s], x_bs[b, s] + b_bs[b, s]],
+                     [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
                 color=color)
         end
     end
     return plt
+end
+
+"""Create block_allocation for each module."""
+function block_allocation(shelves, blocks, S_m, H_s, W_s, b_bs, x_bs, z_bs)
+    return [block_allocation(shelves′, blocks, H_s, W_s, b_bs, x_bs, z_bs) for shelves′ in S_m]
 end
 
 """Creates a barchart of number of product facings per product."""

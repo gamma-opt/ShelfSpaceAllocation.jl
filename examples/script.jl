@@ -82,12 +82,16 @@ x_bs = variables[:x_bs]
 z_bs = variables[:z_bs]
 
 @info "Plotting planogram"
-p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
-savefig(p1, joinpath(output_dir, "planogram.svg"))
+p1 = planogram(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+for (i, p) in enumerate(p1)
+    savefig(p, joinpath(output_dir, "planogram_$i.svg"))
+end
 
 @info "Plotting block allocation"
-p2 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-savefig(p2, joinpath(output_dir, "block_allocation.svg"))
+p2 = block_allocation(shelves, blocks, S_m, H_s, W_s, b_bs, x_bs, z_bs)
+for (i, p) in enumerate(p2)
+    savefig(p, joinpath(output_dir, "block_allocation_$i.svg"))
+end
 
 @info "Plotting product facings"
 p3 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
