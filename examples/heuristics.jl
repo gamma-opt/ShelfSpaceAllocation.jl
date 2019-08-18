@@ -3,7 +3,7 @@ using Dates, JuMP, Gurobi, Plots, Logging
 push!(LOAD_PATH, dirname(@__DIR__))
 using ShelfSpaceAllocation
 
-"""Heuristic algorithm"""
+"""Relax-and-fix heuristic."""
 function relax_and_fix(
         products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
         P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
@@ -68,9 +68,9 @@ end
 # --- Arguments ---
 
 time_limit = 3*60 # Seconds
-case = "case1"
-product_path = joinpath(@__DIR__, "data", case, "products.csv")
-shelf_path = joinpath(@__DIR__, "data", case, "shelves.csv")
+case = "small"
+product_path = joinpath(@__DIR__, "instances", case, "products.csv")
+shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
 output_dir = joinpath(@__DIR__, "output", case, string(Dates.now()))
 
 # ---

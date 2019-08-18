@@ -7,9 +7,9 @@ using ShelfSpaceAllocation
 
 time_limit = 20*60 # Seconds
 mip_gap = 0.05
-case = "case3"
-product_path = joinpath(@__DIR__, "data", case, "products.csv")
-shelf_path = joinpath(@__DIR__, "data", case, "shelves.csv")
+case = "large"
+product_path = joinpath(@__DIR__, "instances", case, "products.csv")
+shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
 output_dir = joinpath(@__DIR__, "output", case, string(Dates.now()))
 
 # ---
@@ -31,8 +31,8 @@ parameters = load_parameters(product_path, shelf_path)
 @info "Creating the model"
 model = shelf_space_allocation_model(
     products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL)
-
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL;
+    w_1=2.5, w_2=10.0, w_3=0.0)
 # --- Heuristics ---
 
 # Fix the block width
