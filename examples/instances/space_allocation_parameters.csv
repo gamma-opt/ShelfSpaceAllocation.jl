@@ -1,2 +1,0 @@
-time_limit,first_time_limit,expected_profit,empty_space_penalty,shortage_penalty,shelf_up_down_penalty,count_sku_on_store,block_dislocation_penalty,scenario_id,store_id,spacing,small_block_limit,slack
-270,30,1,0.5,10,0.1,100,1,bafd1a05c93dd470,78,1,5,0

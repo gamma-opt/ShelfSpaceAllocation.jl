@@ -5,9 +5,9 @@ using ShelfSpaceAllocation
 
 # --- Arguments ---
 
-time_limit = 20*60 # Seconds
+time_limit = 1*60 # Seconds
 mip_gap = 0.05
-case = "large"
+case = "medium"
 product_path = joinpath(@__DIR__, "instances", case, "products.csv")
 shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
 output_dir = joinpath(@__DIR__, "output", case, string(Dates.now()))
@@ -26,32 +26,13 @@ global_logger(logger)
 @info "Loading parameters"
 parameters = load_parameters(product_path, shelf_path)
 (products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL) = parameters
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL, empty_space_penalty, shortage_penalty, shelf_up_down_penalty) = parameters
 
 @info "Creating the model"
 model = shelf_space_allocation_model(
     products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL;
-    w_1=2.5, w_2=10.0, w_3=0.0)
-# --- Heuristics ---
-
-# Fix the block width
-# @constraint(model, [b = blocks, s = shelves],
-#     model.obj_dict[:b_bs][b, s] == W_s[s]/2 * model.obj_dict[:z_bs][b, s]);
-
-# # Fix the block width
-# @constraint(model, [b = filter(p->p∉[3,5,8], blocks), s = shelves],
-#     model.obj_dict[:b_bs][b, s] == W_s[s]/2 * model.obj_dict[:z_bs][b, s]);
-
-# # Fill atleast 98% of the shelf space with blocks
-# @constraint(model,
-#     sum(model.obj_dict[:b_bs][b, s] for b in blocks for s in shelves) ≥
-#     0.98 * sum(W_s[s] for s in shelves))
-
-# # Total product width should be atleast 98% of the total block width
-# @constraint(model, [b = blocks],
-#     sum(W_p[p] * model.obj_dict[:n_ps][p, s] for p in P_b[b] for s in shelves) ≥
-#     0.98 * sum(model.obj_dict[:b_bs][b, s] for s in shelves))
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL,
+    empty_space_penalty, shortage_penalty, shelf_up_down_penalty)
 
 @info "Starting the optimization"
 

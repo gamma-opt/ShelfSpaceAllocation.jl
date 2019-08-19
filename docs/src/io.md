@@ -34,7 +34,7 @@ Each `shelves.csv` file contains following attributes:
 - `product_min_unit_weight`
 - `product_max_unit_weight`
 
-Examples of input parameters can found inside `examples/data` directory.
+Examples of input parameters can found inside `examples/instances` directory.
 
 ## Results
 Results are best stored in a non-tabular format as JSON files.

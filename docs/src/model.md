@@ -45,7 +45,10 @@ Both products and shelves have several attributes associated with them. These at
 -  $SL$ -- Slack, maximum difference in block starting points and between block max and min width
 
 ## Objective
-The shelf space allocation model contains multiple objectives. The multi-objective formulation is reduced into singe objective using linear scalarization, i.e. weighted sum
+!!! note
+    Currently, JuMP doesn't support multi-objective optimization, and thus the weights are manually tuned such that the algorithm obtains satisfying solutions. However, solvers such as Gurobi have capabilities for multi-objective optimization and using them should be considered in the future.
+
+The shelf space allocation model contains multiple objectives. The multi-objective formulation is reduced into single objective using linear scalarization, i.e. weighted sum
 
 $$\min ∑_{i=1}^n w_i f_i$$
 
@@ -55,8 +58,11 @@ where $f_i$ are the objectives and $w_i>0$ are the weight parameters. There are 
 2)  $f_2=∑_p G_p e_p$ -- Total profit loss from product shortage.
 3)  $f_3=∑_{p,s} L_p L_s n_{p,s}$ -- Product shelf height placement penalty. Preferres the placement of products with higher weight $L_p$ to lower shelves.
 
-!!! note
-    Currently, JuMP doesn't support multi-objective optimization, and thus the weights are manually tuned such that the algorithm obtains satisfying solutions. However, solvers such as Gurobi have capabilities for multi-objective optimization and using them should be considered in the future.
+The weights corresponding to the objectives are named as:
+
+1)  $w_1$ -- `empty_space_penalty`
+2)  $w_2$ -- `shortage_penalty`
+3)  $w_3$ -- `shelf_up_down_penalty`
 
 ## Basic Constraints
 ![](figures/model/planogram-basic.svg)

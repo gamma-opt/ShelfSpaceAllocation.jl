@@ -49,7 +49,10 @@ function load_parameters(product_path, shelf_path):: NamedTuple
         L_s = shelf_data.level,
         H_p = product_data.height,
         SK_p = product_data.max_stack,
-        SL = 0
+        SL = 0,
+        empty_space_penalty = 0.5,
+        shortage_penalty = 10.0,
+        shelf_up_down_penalty = 0.1
     )
 end
 
@@ -92,8 +95,8 @@ end
 Problem (SSAP)."""
 function shelf_space_allocation_model(
         products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-        N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL;
-        w_1=0.5, w_2=10.0, w_3=0.1):: Model
+        N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL,
+        w_1, w_2, w_3):: Model
     # Initialize the model
     model = Model()
 

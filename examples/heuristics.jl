@@ -7,7 +7,7 @@ using ShelfSpaceAllocation
 function relax_and_fix(
         products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
         P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-        H_p, SL, block_partitions, optimizer; w_1=0.5, w_2=10.0, w_3=0.1)
+        H_p, SL, block_partitions, optimizer, w_1, w_2, w_3)
     # Remember fixed blocks and values
     relaxed_blocks = block_partitions[2:end]
     # TODO: test fixing related n_ps variables too for faster runtime
@@ -21,7 +21,7 @@ function relax_and_fix(
         model = shelf_space_allocation_model(
             products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps,
             D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-            H_p, SL; w_1=w_1, w_2=w_2, w_3=w_3)
+            H_p, SL, w_1, w_2, w_3)
 
         # Relaxed values
         for relaxed_block in relaxed_blocks
@@ -65,6 +65,39 @@ function relax_and_fix(
     return model
 end
 
+"""Fix-and-optimize heuristic."""
+function fix_and_optimize(
+        products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
+        P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
+        H_p, SL, z_bs, w_1, w_2, w_3)
+
+    model = shelf_space_allocation_model(
+        products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps,
+        D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
+        H_p, SL, w_1, w_2, w_3)
+
+    for b in blocks
+        # Pad with zeros and find 0-1 boundaries using diff
+        difference = diff(vcat([0], z_bs[b, :], [0]))
+        # Fix a subset of z_bs variables
+        i = 1
+        while i <= length(difference)
+            if abs(difference[i]) == 1
+                i += 2
+            else
+                s = i - 1
+                if s > 0
+                    unset_binary(model.obj_dict[:z_bs][b, s])
+                    fix(model.obj_dict[:z_bs][b, s], z_bs[b, s])
+                end
+                i += 1
+            end
+        end
+    end
+
+    return model
+end
+
 # --- Arguments ---
 
 time_limit = 3*60 # Seconds
@@ -87,9 +120,9 @@ global_logger(logger)
 @info "Loading parameters"
 parameters = load_parameters(product_path, shelf_path)
 (products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL) = parameters
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL, empty_space_penalty, shortage_penalty, shelf_up_down_penalty) = parameters
 
-@info "Creating the model"
+@info "Relax-and-fix"
 optimizer = with_optimizer(
     Gurobi.Optimizer,
     TimeLimit=time_limit,
@@ -99,12 +132,22 @@ optimizer = with_optimizer(
     # Presolve=2,
 )
 block_partitions = [[7, 1], [6, 8], [2, 4], [9, 3, 5]]
-model = relax_and_fix(
+model1 = relax_and_fix(
     products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
     P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-    H_p, SL, block_partitions, optimizer; w_1=0.5, w_2=10.0, w_3=0.1)
+    H_p, SL, block_partitions, optimizer, empty_space_penalty,
+    shortage_penalty, shelf_up_down_penalty)
+
+@info "Fix-and-optimize"
+model = fix_and_optimize(
+    products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
+    P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
+    H_p, SL, value.(model1.obj_dict[:z_bs]), empty_space_penalty,
+    shortage_penalty, shelf_up_down_penalty)
+optimize!(model, optimizer)
 
 @info "Saving the results"
+
 variables = Dict(k => value.(v) for (k, v) in model.obj_dict)
 # variables = extract_variables(model)
 # objectives = extract_objectives(parameters, variables)

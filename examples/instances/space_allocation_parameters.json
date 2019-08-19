@@ -1,0 +1,15 @@
+{
+  "time_limit": 270,
+  "first_time_limit": 30,
+  "expected_profit": 1,
+  "empty_space_penalty": 0.5,
+  "shortage_penalty": 10.0,
+  "shelf_up_down_penalty": 0.1,
+  "count_sku_on_store": 100,
+  "block_dislocation_penalty": 1,
+  "scenario_id": "bafd1a05c93dd470",
+  "store_id": 78,
+  "spacing": 1,
+  "small_block_limit": 5,
+  "slack": 0.0
+}
