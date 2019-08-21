@@ -15,7 +15,7 @@ makedocs(
         "Home" => "index.md",
         "guide.md",
         "model.md",
-        "plotting.md",
+        "visualization.md",
         "io.md",
         "heuristics.md",
         "library.md"

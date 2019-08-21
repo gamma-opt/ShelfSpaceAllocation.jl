@@ -1,4 +1,4 @@
-# Plotting
+# Visualization
 This section illustrates the results of the optimization model using visualizations implemented with `Plots.jl`.
 
 ## Planogram
