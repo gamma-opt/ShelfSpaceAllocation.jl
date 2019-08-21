@@ -4,7 +4,7 @@ This section illustrates the results of the optimization model using visualizati
 ## Planogram
 ![](figures/results/planogram.svg)
 
-Planogram visualizes the product placing on the shelves. [^Rouse2010]
+Planogram visualizes the product placing on the shelves. Blocks are indicated by the different colors. A definition of planogram can be found at [^Rouse2010].
 
 ## Block Allocation
 ![](figures/results/block_allocation.svg)
