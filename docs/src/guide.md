@@ -29,8 +29,14 @@ Gurobi is a powerful commercial optimizer which provides a free academic license
 
 
 ## Examples
-The [examples](https://github.com/jaantollander/ShelfSpaceAllocation.jl/tree/master/examples) are located in the package GitHub repository. The `script.jl` file demonstrates how to use the package and the input data can be found inside the `data/` directory.
+Examples are located in the `examples` directory. Inside, the `script.jl` the file demonstrates how to run the optimization model on different example instances. Example instances can be found from the `examples/instances` directory. There are three instances in total, *small*, *medium* and *large*, named by their relative size. The computational complexity of solving the instances increases as the size increases.
 
+```@example
+using CSV #hide
+using Latexify #hide
+df = CSV.read(joinpath("tables", "examples.csv")) #hide
+mdtable(df,latex=false) #hide
+```
 
 ## Documentation
 The project documentation is created using [Documenter.jl](https://juliadocs.github.io/Documenter.jl/stable/). To build the documentation, navigate inside the `docs` directory and run the command
