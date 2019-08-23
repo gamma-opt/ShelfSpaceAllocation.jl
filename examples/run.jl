@@ -26,7 +26,8 @@ global_logger(logger)
 @info "Loading parameters"
 parameters = load_parameters(product_path, shelf_path)
 (products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL, empty_space_penalty, shortage_penalty, shelf_up_down_penalty) = parameters
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL,
+    empty_space_penalty, shortage_penalty, shelf_up_down_penalty) = parameters
 
 @info "Creating the model"
 model = shelf_space_allocation_model(
@@ -35,7 +36,6 @@ model = shelf_space_allocation_model(
     empty_space_penalty, shortage_penalty, shelf_up_down_penalty)
 
 @info "Starting the optimization"
-
 optimizer = with_optimizer(
     Gurobi.Optimizer,
     TimeLimit=time_limit,
@@ -78,19 +78,19 @@ end
 p3 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
 savefig(p3, joinpath(output_dir, "product_facings.svg"))
 
+@info "Plotting demand and sales"
+p4 = demand_and_sales(blocks, P_b, D_p, s_p)
+savefig(p4, joinpath(output_dir, "demand_and_sales.svg"))
+
 @info "Plotting fill amount"
-p4 = fill_amount(shelves, blocks, P_b, n_ps)
-savefig(p4, joinpath(output_dir, "fill_amount.svg"))
+p5 = fill_amount(shelves, blocks, P_b, n_ps)
+savefig(p5, joinpath(output_dir, "fill_amount.svg"))
 
 @info "Plotting fill percentage"
-p5 = fill_percentage(
+p6 = fill_percentage(
     n_ps, products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps,
     D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p,
     with_optimizer(Gurobi.Optimizer, TimeLimit=60))
-savefig(p5, joinpath(output_dir, "fill_percentage.svg"))
-
-@info "Plotting demand and sales"
-p6 = demand_and_sales(blocks, P_b, D_p, s_p)
-savefig(p6, joinpath(output_dir, "demand_and_sales.svg"))
+savefig(p6, joinpath(output_dir, "fill_percentage.svg"))
 
 close(io)
