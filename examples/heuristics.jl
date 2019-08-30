@@ -100,8 +100,9 @@ end
 
 # --- Arguments ---
 
-time_limit = 3*60 # Seconds
+time_limit = 5*60 # Seconds
 case = "small"
+block_partitions = [[7, 1], [6, 8], [2, 4], [9, 3, 5]]
 product_path = joinpath(@__DIR__, "instances", case, "products.csv")
 shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
 output_dir = joinpath(@__DIR__, "output", case, string(Dates.now()))
@@ -120,7 +121,8 @@ global_logger(logger)
 @info "Loading parameters"
 parameters = load_parameters(product_path, shelf_path)
 (products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps, D_p,
-    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL, empty_space_penalty, shortage_penalty, shelf_up_down_penalty) = parameters
+    N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL,
+    empty_space_penalty, shortage_penalty, shelf_up_down_penalty) = parameters
 
 @info "Relax-and-fix"
 optimizer = with_optimizer(
@@ -131,7 +133,6 @@ optimizer = with_optimizer(
     MIPGap=0.01,
     # Presolve=2,
 )
-block_partitions = [[7, 1], [6, 8], [2, 4], [9, 3, 5]]
 model1 = relax_and_fix(
     products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
     P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
@@ -164,13 +165,13 @@ z_bs = variables[:z_bs]
 p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
 savefig(p1, joinpath(output_dir, "planogram.svg"))
 
-@info "Plotting product facings"
-p2 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
-savefig(p2, joinpath(output_dir, "product_facings.svg"))
-
 @info "Plotting block allocation"
-p3 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-savefig(p3, joinpath(output_dir, "block_allocation.svg"))
+p2 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+savefig(p2, joinpath(output_dir, "block_allocation.svg"))
+
+@info "Plotting product facings"
+p3 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
+savefig(p3, joinpath(output_dir, "product_facings.svg"))
 
 @info "Plotting fill amount"
 p4 = fill_amount(shelves, blocks, P_b, n_ps)
