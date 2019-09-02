@@ -29,7 +29,7 @@ Gurobi is a powerful commercial optimizer which provides a free academic license
 
 
 ## Examples
-Examples are located in the `examples` directory. Inside, the `script.jl` the file demonstrates how to run the optimization model on different example instances. Example instances can be found from the `examples/instances` directory. There are three instances in total, *small*, *medium* and *large*, named by their relative size. The computational complexity of solving the instances increases as the size increases.
+Examples are located in the `examples` directory. Inside, the `run.jl` the file demonstrates how to run the optimization model on different example instances. There is also a Jupyter notebook version, `examples/example.ipynb`, of the file. Example instances can be found from the `examples/instances` directory. There are three instances in total, *small*, *medium* and *large*, named by their relative size. The computational complexity of solving the instances increases as the size increases.
 
 ```@example
 using CSV #hide
@@ -37,6 +37,7 @@ using Latexify #hide
 df = CSV.read(joinpath("tables", "examples.csv")) #hide
 mdtable(df,latex=false) #hide
 ```
+
 
 ## Documentation
 The project documentation is created using [Documenter.jl](https://juliadocs.github.io/Documenter.jl/stable/). To build the documentation, navigate inside the `docs` directory and run the command
