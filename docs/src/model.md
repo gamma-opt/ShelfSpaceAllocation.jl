@@ -65,7 +65,7 @@ The weights corresponding to the objectives are named as:
 3)  $w_3$ -- `shelf_up_down_penalty`
 
 ## Basic Constraints
-![](figures/model/planogram-basic.svg)
+![](figures/planogram-no-block.svg)
 
 Number of facings of product $p$ on shelf $s$
 
@@ -115,7 +115,7 @@ $$\begin{aligned}
 \end{aligned}$$
 
 ## Block Constraints
-![](figures/model/planogram.svg)
+![](figures/results/planogram.svg)
 
 The width of block $b$ on shelf $s$ must be larger or equal to the sum of the widths of products $P_b$ on the shelf $s$
 
