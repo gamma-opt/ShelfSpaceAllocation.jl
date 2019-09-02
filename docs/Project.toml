@@ -4,3 +4,4 @@ Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 
 [compat]
 Documenter = "~23.0"
+Latexify = "~0.8"
