@@ -169,29 +169,26 @@ end
 function fix_and_optimize(
         products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
         P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-        H_p, SL, z_bs, w_1, w_2, w_3)
+        H_p, SL, z_bs, w_bb, w_1, w_2, w_3)
 
     model = shelf_space_allocation_model(
         products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps,
         D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
         H_p, SL, w_1, w_2, w_3)
 
+    # Fix z_bb variables
     for b in blocks
-        # Pad with zeros and find 0-1 boundaries using diff
-        difference = diff(vcat([0], z_bs[b, :], [0]))
-        # Fix a subset of z_bs variables
-        i = 1
-        while i <= length(difference)
-            if abs(difference[i]) == 1
-                i += 2
-            else
-                s = i - 1
-                if s > 0
-                    unset_binary(model.obj_dict[:z_bs][b, s])
-                    fix(model.obj_dict[:z_bs][b, s], z_bs[b, s])
-                end
-                i += 1
-            end
+        for s in shelves
+            unset_binary(model.obj_dict[:z_bs][b, s])
+            fix(model.obj_dict[:z_bs][b, s], z_bs[b, s])
+        end
+    end
+
+    # Fix w_bb variables
+    for b in blocks
+        for b′ in blocks
+            unset_binary(model.obj_dict[:w_bb][b, b′])
+            fix(model.obj_dict[:w_bb][b, b′], w_bb[b, b′])
         end
     end
 
@@ -200,8 +197,8 @@ end
 
 
 # --- Arguments ---
-case = "medium"
-partition_size = 2
+case = "small"
+partition_size = 3
 product_path = joinpath(@__DIR__, "instances", case, "products.csv")
 shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
 output_dir = joinpath(@__DIR__, "output_heuristics", case, string(Dates.now()))
@@ -296,8 +293,8 @@ savefig(p2, joinpath(output_dir, "block_allocation_relax_and_fix.svg"))
 model3 = fix_and_optimize(
     products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
     P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-    H_p, SL, value.(model2.obj_dict[:z_bs]), empty_space_penalty,
-    shortage_penalty, shelf_up_down_penalty)
+    H_p, SL, value.(model2.obj_dict[:z_bs]), value.(model2.obj_dict[:w_bb]),
+    empty_space_penalty, shortage_penalty, shelf_up_down_penalty)
 optimize!(model3, with_optimizer(
     Gurobi.Optimizer,
     TimeLimit=60,
