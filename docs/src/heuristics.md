@@ -39,28 +39,56 @@ The block-shelf variables will be relaxed by a subset of blocks at a time. This 
 ## Fix-and-Optimize
 The goal of fix-and-optimize heuristic is to improve the existing feasible solution, for example, one obtained from relax-and-fix heuristic. Fix-and-optimize heuristic operates by fixing a part of the variables to the values in the existing solution and making the other variables unfixed and then performing the optimization.
 
-For the shelf space allocation model, the block-shelf allocation variables were chosen as the target variables because they have the largest impact on the computational time. The simplest form of fix-and-optimize is to fix all of the target variables, which was used here. More intelligent strategies where only a part of the target variables are fixed could be beneficial for large instances, but this remains as a research question.
+For the shelf space allocation model, the block-shelf allocation variables were chosen as the target variables because they have the largest impact on the computational time. The simplest form of fix-and-optimize is to fix all of the target variables, which is used here. More intelligent strategies where only a part of the target variables are fixed could be beneficial for large instances, but this remains as a research question.
 
 ## Example
-![](figures/heuristics/relax-and-fix/iteration-1.svg)
+![](figures/planogram_no_blocks.svg)
 
-Relax-and-fix iteration 1: Blocks $B_1=\{7, 1\}$
+First, the shelf space allocation model is solved without the block constraints. It's very fast to solve and gives us a good starting point for setting the parameters for the heuristic.
 
-![](figures/heuristics/relax-and-fix/iteration-2.svg)
+![](figures/fill_amount_no_blocks.svg)
 
-Relax-and-fix iteration 2: Blocks $B_2=\{6, 8\}$
+Compute the absolute amount of products allocated on the shelves per block. Sort the blocks from most items allocated to least items allocated. Partition these indices into sets of chosen size. For example, in this case the sorted sequence of blocks is $(7, 1, 2, 6, 4, 8, 9, 3, 5)$ and they are partitioned into four sets $B_1=\{7, 1\}$, $B_2=\{2, 6\}$, $B_3=\{4, 8\}$ and $B_4=\{9, 3, 5\}$.
 
-![](figures/heuristics/relax-and-fix/iteration-3.svg)
+This means that relax-and-fix heuristic will perform four iterations
 
-Relax-and-fix iteration 3: Blocks $B_3=\{2, 4\}$
+Next figures visualize which block allocation variables $z_{b,s}, z_{b,s}^f, z_{b,s}^l$ are fixed, binary and relaxed in each iteration.
 
-![](figures/heuristics/relax-and-fix/iteration-4.svg)
+![](figures/heuristics/relax-and-fix-iteration-1.svg)
 
-Relax-and-fix iteration 4: Blocks $B_4=\{9, 3, 5\}$
+Relax-and-fix iteration 1:
+
+* Fixed: $b∈∅$
+* Binary: $b∈B_1$
+* Relaxed: $b∈B_2∪B_3∪B_4$
+
+![](figures/heuristics/relax-and-fix-iteration-2.svg)
+
+Relax-and-fix iteration 2:
+
+* Fixed: $b∈B_1$
+* Binary: $b∈B_2$
+* Relaxed: $b∈B_3∪B_4$
+
+![](figures/heuristics/relax-and-fix-iteration-3.svg)
+
+Relax-and-fix iteration 3:
+
+* Fixed: $b∈B_1∪B_2$
+* Binary: $b∈B_3$
+* Relaxed: $b∈B_4$
+
+![](figures/heuristics/relax-and-fix-iteration-4.svg)
+
+Relax-and-fix iteration 4:
+
+* Fixed: $b∈B_1∪B_2∪B_3$
+* Binary: $b∈B_4$
+* Relaxed: $b∈∅$
 
 ![](figures/heuristics/fix-and-optimize.svg)
 
-Fix-and-optimize
+The final solution is obtained by running the fix-and-optimize heuristic on the solution obtained by relax-and-fix. In this case, all block-shelf allocation variables $z_{b,s}, z_{b,s}^f, z_{b,s}^l$ and block-block relative order variables $w_{b,b′}$ were fixed at their values.
 
 
 ## References
