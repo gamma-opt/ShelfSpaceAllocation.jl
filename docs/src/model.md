@@ -65,7 +65,7 @@ The weights corresponding to the objectives are named as:
 3)  $w_3$ -- `shelf_up_down_penalty`
 
 ## Basic Constraints
-![](figures/planogram-no-block.svg)
+![](figures/planogram_no_blocks.svg)
 
 Number of facings of product $p$ on shelf $s$
 
