@@ -5,8 +5,8 @@ using ShelfSpaceAllocation
 
 # --- Arguments ---
 
-time_limit = 1*60 # Seconds
-mip_gap = 0.05
+time_limit = 3*60 # Seconds
+mip_gap = 0.01
 case = "medium"
 product_path = joinpath(@__DIR__, "instances", case, "products.csv")
 shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
@@ -35,6 +35,10 @@ model = shelf_space_allocation_model(
     N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p, SL,
     empty_space_penalty, shortage_penalty, shelf_up_down_penalty)
 
+# # Fix the block width
+# @constraint(model, [b = blocks, s = shelves],
+#     model.obj_dict[:b_bs][b, s] == W_s[s]/2 * model.obj_dict[:z_bs][b, s]);
+
 @info "Starting the optimization"
 optimizer = with_optimizer(
     Gurobi.Optimizer,
@@ -42,7 +46,6 @@ optimizer = with_optimizer(
     LogFile=joinpath(output_dir, "gurobi.log"),
     MIPFocus=3,
     MIPGap=mip_gap,
-    # Presolve=2,
 )
 optimize!(model, optimizer)
 
