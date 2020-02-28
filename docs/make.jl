@@ -1,7 +1,6 @@
 using Documenter
 
-project_dir = dirname(@__DIR__)
-push!(LOAD_PATH, project_dir)
+push!(LOAD_PATH, dirname(@__DIR__))
 using ShelfSpaceAllocation
 
 makedocs(
@@ -15,10 +14,10 @@ makedocs(
         "Home" => "index.md",
         "guide.md",
         "model.md",
-        "visualization.md",
+        "plotting.md",
         "io.md",
         "heuristics.md",
-        "library.md"
+        "api.md"
     ]
 )
 
