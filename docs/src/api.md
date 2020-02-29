@@ -1,14 +1,14 @@
 # API
 Documentation for `ShelfSpaceAllocation.jl`'s interface.
 
-## Index
-```@index
-Pages = ["library.md"]
-```
-
 ## Model
 ```@docs
-shelf_space_allocation_model
+ShelfSpaceAllocationModel
+Specs
+Params
+Variables
+Objectives
+ShelfSpaceAllocationModel(::Params, ::Specs)
 ```
 
 *Sets and Subsets*
@@ -122,13 +122,16 @@ $$\begin{aligned}
 & ∑_m v_{b,m} ≤ 1, & ∀b
 \end{aligned}$$
 
-
-## IO
+## Input
 ```@docs
-load_parameters
+Params(::AbstractString, ::AbstractString)
+```
+
+## Output
+```@docs
+Variables(::ShelfSpaceAllocationModel)
+Objectives(::ShelfSpaceAllocationModel)
 save_results
-extract_variables
-extract_objectives
 ```
 
 ## Plotting
