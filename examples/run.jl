@@ -60,7 +60,10 @@ save_results(parameters, variables, objectives, output_dir)
 
 @info "Plotting"
 using Plots, Parameters
-@unpack S_m = parameters
+@unpack products, shelves, blocks, modules, P_b, S_m, G_p,
+        H_s, L_p, P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p,
+        M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL, w1, w2, w3 =
+        parameters
 @unpack n_ps, s_p, o_s, b_bs, x_bs, z_bs = variables
 
 @info "Plotting planograms"
