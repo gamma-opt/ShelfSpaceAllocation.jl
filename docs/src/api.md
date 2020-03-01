@@ -11,6 +11,31 @@ Objectives
 ShelfSpaceAllocationModel(::Params, ::Specs)
 ```
 
+## Input
+```@docs
+Params(::AbstractString, ::AbstractString)
+```
+
+## Output
+```@docs
+Variables(::ShelfSpaceAllocationModel)
+Objectives(::ShelfSpaceAllocationModel)
+save_results
+```
+
+## Plotting
+```@docs
+plot_planogram
+plot_planograms
+plot_block_allocation
+plot_block_allocations
+plot_product_facings
+plot_demand_and_sales
+plot_fill_amount
+plot_fill_percentage
+```
+
+## Model Reference
 *Sets and Subsets*
 
 -  $p∈P$ -- A set of **products**.
@@ -121,25 +146,3 @@ $$\begin{aligned}
 & n_{p,s} ≤ N_p^{max} v_{b,m}, & ∀p,b,m,s∣s∈S_m,p∈P_b \\
 & ∑_m v_{b,m} ≤ 1, & ∀b
 \end{aligned}$$
-
-## Input
-```@docs
-Params(::AbstractString, ::AbstractString)
-```
-
-## Output
-```@docs
-Variables(::ShelfSpaceAllocationModel)
-Objectives(::ShelfSpaceAllocationModel)
-save_results
-```
-
-## Plotting
-```@docs
-planogram
-product_facings
-block_allocation
-demand_and_sales
-fill_amount
-fill_percentage
-```

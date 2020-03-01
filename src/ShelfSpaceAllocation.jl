@@ -9,11 +9,14 @@ export ShelfSpaceAllocationModel,
     save_results
 
 include("plotting.jl")
-export planogram,
-    product_facings,
-    block_allocation,
-    demand_and_sales,
-    fill_amount,
-    fill_percentage
+export plot_planogram,
+    plot_planograms,
+    plot_block_allocation,
+    plot_block_allocations,
+    plot_product_facings,
+    plot_demand_and_sales,
+    plot_fill_amount,
+    plot_fill_percentage,
+    plot_planogram_no_blocks
 
 end # module

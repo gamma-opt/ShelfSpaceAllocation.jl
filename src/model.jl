@@ -203,7 +203,7 @@ function ShelfSpaceAllocationModel(parameters::Params, specs::Specs)
     @variable(model, w_bb[blocks, blocks], Bin)
     @variable(model, v_bm[blocks, modules], Bin)
 
-    # Height and weight constraints
+    # --- Height and weight constraints ---
     for p in products
         for s in shelves
             if (H_p[p] > H_s[s]) | (M_p[p] > M_s_max[s])
