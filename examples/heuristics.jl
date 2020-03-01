@@ -107,6 +107,7 @@ mkpath(output_dir)
 
 @info "Loading parameters"
 parameters = Params(product_path, shelf_path)
+save_json(parameters, joinpath(output_dir, "parameters.json"))
 
 # --- Space allocation without blocks ---
 @info "Space allocation without blocks"
@@ -122,12 +123,8 @@ optimize!(model1, optimizer1);
 
 variables1 = Variables(model1)
 objectives1 = Objectives(model1)
-
-# TODO: plots
-# p1 = plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
-# savefig(p1, joinpath(output_dir, "planogram_no_blocks.svg"))
-# p2 = fill_amount(shelves, blocks, P_b, n_ps)
-# savefig(p2, joinpath(output_dir, "fill_amount_no_blocks.svg"))
+save_json(variables1, joinpath(output_dir, "variables1.json"))
+save_json(objectives1, joinpath(output_dir, "objectives1.json"))
 
 
 # --- Block partitions ---
@@ -156,16 +153,8 @@ model2 = relax_and_fix(parameters, block_partitions, optimizer2)
 
 variables2 = Variables(model2)
 objectives2 = Objectives(model2)
-
-# n_ps = variables[:n_ps]
-# o_s = variables[:o_s]
-# b_bs = variables[:b_bs]
-# x_bs = variables[:x_bs]
-# z_bs = variables[:z_bs]
-# p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
-# savefig(p1, joinpath(output_dir, "planogram_relax_and_fix.svg"))
-# p2 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-# savefig(p2, joinpath(output_dir, "block_allocation_relax_and_fix.svg"))
+save_json(variables2, joinpath(output_dir, "variables2.json"))
+save_json(objectives2, joinpath(output_dir, "objectives2.json"))
 
 
 # --- Fix-and-Optimize Heuristic ---
@@ -184,11 +173,31 @@ optimize!(model3, optimizer3)
 
 variables3 = Variables(model3)
 objectives3 = Objectives(model3)
+save_json(variables3, joinpath(output_dir, "variables3.json"))
+save_json(objectives3, joinpath(output_dir, "objectives3.json"))
 
-# @info "Saving the results"
-# TODO: save_results
+
+# --- Plotting 1 ---
+# TODO: plots
+# p1 = plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
+# savefig(p1, joinpath(output_dir, "planogram_no_blocks.svg"))
+# p2 = fill_amount(shelves, blocks, P_b, n_ps)
+# savefig(p2, joinpath(output_dir, "fill_amount_no_blocks.svg"))
 
 
+# --- Plotting 2 ---
+# n_ps = variables[:n_ps]
+# o_s = variables[:o_s]
+# b_bs = variables[:b_bs]
+# x_bs = variables[:x_bs]
+# z_bs = variables[:z_bs]
+# p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+# savefig(p1, joinpath(output_dir, "planogram_relax_and_fix.svg"))
+# p2 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+# savefig(p2, joinpath(output_dir, "block_allocation_relax_and_fix.svg"))
+
+
+# --- Plotting 3 ---
 # @info "Plotting planogram"
 # p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
 # savefig(p1, joinpath(output_dir, "planogram.svg"))

@@ -149,25 +149,6 @@ function Objectives(model::ShelfSpaceAllocationModel)
     )
 end
 
-"""Save parameters and variables into JSON file.
-
-# Arguments
-- `parameters::Params`
-- `variables::Variables`
-- `objectives::Objectives`
-- `output_dir::AbstractString`
-"""
-function save_results(parameters::Params, variables::Variables,
-                      objectives::Objectives, output_dir::AbstractString)
-    filenames = ["parameters", "variables", "objectives"]
-    objects = [parameters, variables, objectives]
-    for (filename, object) in zip(filenames, objects)
-        open(joinpath(output_dir, "$filename.json"), "w") do io
-            JSON.print(io, object)
-        end
-    end
-end
-
 """Mixed Integer Linear Program (MILP) formulation of the Shelf Space Allocation
 Problem (SSAP).
 
@@ -294,4 +275,16 @@ function ShelfSpaceAllocationModel(parameters::Params, specs::Specs)
     end
 
     return model
+end
+
+"""Save object into JSON file.
+
+# Arguments
+- `object`
+- `output_path::AbstractString`: Full filepath, e.g., `path.json`.
+"""
+function save_json(object, filepath::AbstractString)
+    open(filepath, "w") do io
+        JSON.print(io, object)
+    end
 end

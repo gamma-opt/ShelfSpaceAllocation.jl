@@ -8,6 +8,8 @@ This package is a part of a research project at the Systems Analysis Laboratory 
 ## Usage
 Usage example with Gurobi optimizer.
 
+Three example cases: `small`, `medium` and `large`.
+
 ```julia
 using Dates, JuMP, Gurobi
 using ShelfSpaceAllocation
@@ -34,7 +36,10 @@ optimize!(model, optimizer)
 variables = Variables(model)
 objectives = Objectives(model)
 
-save_results(parameters, variables, objectives, output_dir)
+save_json(specs, joinpath(output_dir, "specs.json"))
+save_json(parameters, joinpath(output_dir, "parameters.json"))
+save_json(variables, joinpath(output_dir, "variables.json"))
+save_json(objectives, joinpath(output_dir, "objectives.json"))
 ```
 
 ## Installation
@@ -46,3 +51,9 @@ pkg> add https://github.com/jaantollander/ShelfSpaceAllocation.jl
 ```bash
 git clone https://github.com/jaantollander/ShelfSpaceAllocation.jl
 ```
+
+Install Julia
+
+Install dependencies
+
+Install Gurobi solver

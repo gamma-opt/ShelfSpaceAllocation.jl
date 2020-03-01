@@ -56,7 +56,10 @@ variables = Variables(model)
 objectives = Objectives(model)
 
 @info "Saving the results"
-save_results(parameters, variables, objectives, output_dir)
+save_json(specs, joinpath(output_dir, "specs.json"))
+save_json(parameters, joinpath(output_dir, "parameters.json"))
+save_json(variables, joinpath(output_dir, "variables.json"))
+save_json(objectives, joinpath(output_dir, "objectives.json"))
 
 @info "Plotting"
 using Plots, Parameters

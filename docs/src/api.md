@@ -20,7 +20,7 @@ Params(::AbstractString, ::AbstractString)
 ```@docs
 Variables(::ShelfSpaceAllocationModel)
 Objectives(::ShelfSpaceAllocationModel)
-save_results
+save_json
 ```
 
 ## Plotting
