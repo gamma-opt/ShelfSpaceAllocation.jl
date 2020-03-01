@@ -12,7 +12,6 @@ makedocs(
     authors = "Jaan Tollander de Balsch, Fabricio Oliveira",
     pages = [
         "Home" => "index.md",
-        "guide.md",
         "model.md",
         "plotting.md",
         "io.md",
