@@ -91,14 +91,14 @@ savefig(p3, joinpath(output_dir, "product_facings.svg"))
 p4 = plot_demand_and_sales(blocks, P_b, D_p, s_p)
 savefig(p4, joinpath(output_dir, "demand_and_sales.svg"))
 
-@info "Plotting fill amount"
-p5 = plot_fill_amount(shelves, blocks, P_b, n_ps)
-savefig(p5, joinpath(output_dir, "fill_amount.svg"))
+@info "Plotting allocation amount"
+p5 = plot_allocation_amount(shelves, blocks, P_b, n_ps)
+savefig(p5, joinpath(output_dir, "allocation_amount.svg"))
 
-@info "Plotting fill percentage"
-p6 = plot_fill_percentage(
+@info "Plotting allocation percentage"
+p6 = plot_allocation_percentage(
     parameters, n_ps,
     with_optimizer(Gurobi.Optimizer, TimeLimit=60))
-savefig(p6, joinpath(output_dir, "fill_percentage.svg"))
+savefig(p6, joinpath(output_dir, "allocation_percentage.svg"))
 
 # close(io)

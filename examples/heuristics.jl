@@ -4,6 +4,19 @@ push!(LOAD_PATH, dirname(@__DIR__))
 using ShelfSpaceAllocation
 
 
+"""Partition array into subarrays of size n."""
+function partition(n::Integer, array::Array{T}):: Array{Array{T}} where T
+    r = []
+    i = 0
+    m = div(length(array), n)
+    for _ in 1:(m-1)
+        push!(r, [array[j+i] for j in 1:n])
+        i += n
+    end
+    push!(r, array[(i+1):end])
+    return r
+end
+
 """Relax-and-fix heuristic."""
 function relax_and_fix(parameters::Params, block_partitions, optimizer)
     # Remember fixed blocks and values
@@ -76,18 +89,6 @@ function fix_and_optimize(parameters::Params, z_bs, w_bb)
     return model
 end
 
-"""Partition array into subarrays of size n."""
-function partition(n::Integer, array::Array)
-    r = []
-    i = 0
-    m = div(length(array), n)
-    for _ in 1:(m-1)
-        push!(r, [array[j+i] for j in 1:n])
-        i += n
-    end
-    push!(r, array[(i+1):end])
-    return r
-end
 
 # --- Arguments ---
 case = "small"
@@ -109,6 +110,13 @@ mkpath(output_dir)
 parameters = Params(product_path, shelf_path)
 save_json(parameters, joinpath(output_dir, "parameters.json"))
 
+# We need the raw values later.
+@unpack products, shelves, blocks, modules, P_b, S_m, G_p,
+        H_s, L_p, P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p,
+        M_s_min, M_s_max, R_p, L_s, H_p, SK_p, SL, w1, w2, w3 =
+        parameters
+
+
 # --- Space allocation without blocks ---
 @info "Space allocation without blocks"
 model1 = ShelfSpaceAllocationModel(parameters, Specs(blocking=false))
@@ -129,12 +137,16 @@ save_json(objectives1, joinpath(output_dir, "objectives1.json"))
 
 # --- Block partitions ---
 @info "Define block partitions"
-@unpack shelves, blocks, P_b = parameters
-
 n_ps = value.(model1[:n_ps])
+
+# Amount of products allocated per block.
 amounts = round.(
     [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks])
+
+# Blocks from highest to lowest amount of product allocated per block.
 block_indices = reverse(sortperm(amounts))
+
+# Partition the blocks into arrays of partition size
 block_partitions = partition(partition_size, block_indices)
 
 @info amounts block_indices block_partitions
@@ -178,52 +190,53 @@ save_json(objectives3, joinpath(output_dir, "objectives3.json"))
 
 
 # --- Plotting 1 ---
-# TODO: plots
-# p1 = plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
-# savefig(p1, joinpath(output_dir, "planogram_no_blocks.svg"))
-# p2 = fill_amount(shelves, blocks, P_b, n_ps)
-# savefig(p2, joinpath(output_dir, "fill_amount_no_blocks.svg"))
+@unpack n_ps, o_s = variables1
+
+# TODO: handle modules
+p1 = plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
+savefig(p1, joinpath(output_dir, "planogram_no_blocks.svg"))
+
+p2 = plot_allocation_amount(shelves, blocks, P_b, n_ps)
+savefig(p2, joinpath(output_dir, "allocation_amount_no_blocks.svg"))
 
 
 # --- Plotting 2 ---
-# n_ps = variables[:n_ps]
-# o_s = variables[:o_s]
-# b_bs = variables[:b_bs]
-# x_bs = variables[:x_bs]
-# z_bs = variables[:z_bs]
-# p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
-# savefig(p1, joinpath(output_dir, "planogram_relax_and_fix.svg"))
-# p2 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-# savefig(p2, joinpath(output_dir, "block_allocation_relax_and_fix.svg"))
+@unpack n_ps, o_s, b_bs, x_bs, z_bs = variables2
+
+p1 = plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+savefig(p1, joinpath(output_dir, "planogram_relax_and_fix.svg"))
+
+p2 = plot_block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+savefig(p2, joinpath(output_dir, "block_allocation_relax_and_fix.svg"))
 
 
 # --- Plotting 3 ---
-# @info "Plotting planogram"
-# p1 = planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
-# savefig(p1, joinpath(output_dir, "planogram.svg"))
-#
-# @info "Plotting block allocation"
-# p2 = block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-# savefig(p2, joinpath(output_dir, "block_allocation.svg"))
-#
-# @info "Plotting product facings"
-# p3 = product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
-# savefig(p3, joinpath(output_dir, "product_facings.svg"))
-#
-# # FIXME
-# # @info "Plotting demand and sales"
-# # p4 = demand_and_sales(blocks, P_b, D_p, s_p)
-# # savefig(p4, joinpath(output_dir, "demand_and_sales.svg"))
-#
-# @info "Plotting fill amount"
-# p5 = fill_amount(shelves, blocks, P_b, n_ps)
-# savefig(p5, joinpath(output_dir, "fill_amount.svg"))
-#
-# @info "Plotting fill percentage"
-# p6 = fill_percentage(
-#     n_ps, products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps,
-#     D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p,
-#     with_optimizer(Gurobi.Optimizer, TimeLimit=60, LogToConsole=false))
-# savefig(p6, joinpath(output_dir, "fill_percentage.svg"))
+@unpack n_ps, o_s, x_bs, z_bs, s_p = variables3
+
+@info "Plotting planogram"
+p1 = plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+savefig(p1, joinpath(output_dir, "planogram.svg"))
+
+@info "Plotting block allocation"
+p2 = plot_block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+savefig(p2, joinpath(output_dir, "block_allocation.svg"))
+
+@info "Plotting product facings"
+p3 = plot_product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
+savefig(p3, joinpath(output_dir, "product_facings.svg"))
+
+@info "Plotting demand and sales"
+p4 = plot_demand_and_sales(blocks, P_b, D_p, s_p)
+savefig(p4, joinpath(output_dir, "demand_and_sales.svg"))
+
+@info "Plotting allocation amount"
+p5 = plot_allocation_amount(shelves, blocks, P_b, n_ps)
+savefig(p5, joinpath(output_dir, "allocation_amount.svg"))
+
+@info "Plotting allocation percentage"
+p6 = plot_allocation_percentage(
+    parameters, n_ps,
+    with_optimizer(Gurobi.Optimizer, TimeLimit=60, LogToConsole=false))
+savefig(p6, joinpath(output_dir, "allocation_percentage.svg"))
 
 # close(io)

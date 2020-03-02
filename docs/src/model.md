@@ -64,6 +64,8 @@ The weights corresponding to the objectives are named as:
 2)  $w_2$ -- `shortage_penalty`
 3)  $w_3$ -- `shelf_up_down_penalty`
 
+Currently, the weights are set to empirically tested values.
+
 ## Basic Constraints
 ![](figures/planogram_no_blocks.svg)
 

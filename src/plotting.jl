@@ -201,8 +201,8 @@ function plot_demand_and_sales(blocks, P_b, D_p, s_p)
     return plt
 end
 
-"""Plot the total number of allocated facings per product per block."""
-function plot_fill_amount(shelves, blocks, P_b, n_ps)
+"""Plot the total amount of allocated facings per product per block."""
+function plot_allocation_amount(shelves, blocks, P_b, n_ps)
     pr = [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks]
     plt = bar(
         pr,
@@ -217,7 +217,7 @@ function plot_fill_amount(shelves, blocks, P_b, n_ps)
 end
 
 """Plot the percentage of allocated facings of maximum facings per block."""
-function plot_fill_percentage(parameters::Params, n_ps, optimizer)
+function plot_allocation_percentage(parameters::Params, n_ps, optimizer)
     @unpack products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
         P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
         H_p, SK_p, SL, w1, w2, w3 = parameters
