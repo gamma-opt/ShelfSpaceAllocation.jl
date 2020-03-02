@@ -97,8 +97,7 @@ savefig(p5, joinpath(output_dir, "fill_amount.svg"))
 
 @info "Plotting fill percentage"
 p6 = plot_fill_percentage(
-    n_ps, products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p, P_ps,
-    D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p,
+    parameters, n_ps,
     with_optimizer(Gurobi.Optimizer, TimeLimit=60))
 savefig(p6, joinpath(output_dir, "fill_percentage.svg"))
 

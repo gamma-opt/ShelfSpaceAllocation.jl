@@ -3,8 +3,7 @@ using Parameters, Plots, JuMP, LaTeXStrings
 const block_colors = cgrad(:inferno)
 
 """Creates a planogram which visualizes the product placement on the shelves."""
-function plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s,
-                        SK_p, n_ps, o_s, x_bs)
+function plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
     # Initialize the plot
     plt = plot(
         legend=:none,
@@ -25,7 +24,52 @@ function plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s,
                 for i in 1:n_ps[p, s]
                     y = 0
                     for j in 1:stack
-                        plot!(plt, rect(x, y_s[s-shelves[1]+1]+y, W_p[p], H_p[p]),
+                        plot!(plt,
+                              rect(x, y_s[s-shelves[1]+1]+y, W_p[p], H_p[p]),
+                              color=block_colors[b/length(blocks)])
+                        y += H_p[p]
+                    end
+                    x += W_p[p]
+                end
+            end
+        end
+    end
+
+    # Draw shelves
+    for s in shelves
+        plot!(plt, [0, W_s[s]], [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
+              color=:black)
+    end
+    plot!(plt, [0, W_s[shelves[end]]], [y_s[end], y_s[end]],
+          color=:black, linestyle=:dash)
+
+    return plt
+end
+
+"""Creates a planogram which visualizes the product placement on the shelves."""
+function plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
+    # Initialize the plot
+    plt = plot(
+        legend=:none,
+        background=:lightgray,
+        size=(780, 400)
+    )
+
+    # Cumulative shelf heights
+    y_s = vcat([0], cumsum([H_s[s] for s in shelves]))
+
+    # Draw products
+    rect(x, y, w, h) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
+    for s in shelves
+        x = 0
+        for b in blocks
+            for p in P_b[b]
+                stack = max(min(div(H_s[s], H_p[p]), SK_p[p]), 1)
+                for i in 1:n_ps[p, s]
+                    y = 0
+                    for j in 1:stack
+                        plot!(plt,
+                              rect(x, y_s[s]+y, W_p[p], H_p[p]),
                               color=block_colors[b/length(blocks)])
                         y += H_p[p]
                     end
@@ -49,6 +93,10 @@ end
 """Create a planogram for each module."""
 function plot_planograms(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
      return [plot_planogram(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs) for shelves′ in S_m]
+end
+
+function plot_planograms_no_blocks(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
+    return [plot_planogram_no_blocks(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s) for shelves′ in S_m]
 end
 
 """Block starting locations and widths."""
@@ -168,75 +216,23 @@ function plot_fill_amount(shelves, blocks, P_b, n_ps)
     return plt
 end
 
-"""Function for computing maximum number of facings of products that can be
-allocated on shelves."""
-function max_facings(
-        products, shelves, G_p, H_s, L_p, P_ps, D_p, N_p_min, N_p_max, W_p,
-        W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p)
-    # Initialize the model
-    model = Model()
-
-    # --- Basic Variables ---
-    @variable(model, s_p[products] ≥ 0)
-    @variable(model, e_p[products] ≥ 0)
-    @variable(model, o_s[shelves] ≥ 0)
-    @variable(model, n_ps[products, shelves] ≥ 0, Int)
-    @variable(model, y_p[products], Bin)
-
-    # Height and weight constraints
-    for p in products
-        for s in shelves
-            if (H_p[p] > H_s[s]) | (M_p[p] > M_s_max[s])
-                fix(n_ps[p, s], 0, force=true)
-            end
-        end
-    end
-
-    # --- Objective ---
-    w_1 = 0.5
-    w_2 = 10.0
-    w_3 = 0.1
-    @objective(model, Min,
-        w_1 * sum(o_s[s] for s in shelves) +
-        w_2 * sum(G_p[p] * e_p[p] for p in products)
-        # + w_3 * sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves)
-    )
-
-    # --- Basic constraints ---
-    @constraints(model, begin
-        [p = products],
-        s_p[p] ≤ sum(30 / R_p[p] * P_ps[p, s] * n_ps[p, s] for s in shelves)
-        [p = products],
-        s_p[p] ≤ D_p[p]
-    end)
-    @constraint(model, [p = products],
-        s_p[p] + e_p[p] == D_p[p])
-    @constraint(model, [p = products],
-        sum(n_ps[p, s] for s in shelves) ≥ y_p[p])
-    @constraints(model, begin
-        [p = products],
-        N_p_min[p] * y_p[p] ≤ sum(n_ps[p, s] for s in shelves)
-        [p = products],
-        sum(n_ps[p, s] for s in shelves) ≤ N_p_max[p] * y_p[p]
-    end)
-    @constraint(model, [s = shelves],
-        sum(W_p[p] * n_ps[p, s] for p in products) + o_s[s] == W_s[s])
-
-    return model
-end
-
 """Plot the percentage of allocated facings of maximum facings per block."""
-function plot_fill_percentage(
-        n_ps_sol, products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
+function plot_fill_percentage(parameters::Params, n_ps, optimizer)
+    @unpack products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
         P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-        H_p, optimizer)
-    pr = [sum(n_ps_sol[p, s] for p in P_b[b] for s in shelves) for b in blocks]
+        H_p, SK_p, SL, w1, w2, w3 = parameters
+
+    pr = [sum(n_ps[p, s] for p in P_b[b] for s in shelves) for b in blocks]
     pr_max = []
     for b in blocks
-        model = max_facings(P_b[b], shelves, G_p, H_s, L_p, P_ps, D_p,
-            N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s, H_p)
+        specs = Specs(blocking=false)
+        parameters2 = Params(
+            P_b[b], shelves, Integer[], Integer[], [Integer[]], [Integer[]],
+            G_p, H_s, L_p, P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min,
+            M_s_max, R_p, L_s, H_p, SK_p, SL, w1, w2, w3)
+        model = ShelfSpaceAllocationModel(parameters2, specs)
         optimize!(model, optimizer)
-        n_ps_max = value.(model.obj_dict[:n_ps])
+        n_ps_max = value.(model[:n_ps])
         push!(pr_max, sum(n_ps_max[p, s] for p in P_b[b] for s in shelves))
     end
 
@@ -250,51 +246,5 @@ function plot_fill_percentage(
         legend=:none,
         background=:lightgray
     )
-    return plt
-end
-
-
-# FIXME: handle multiple modules
-"""Creates a planogram which visualizes the product placement on the shelves."""
-function plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
-    # Initialize the plot
-    plt = plot(
-        legend=:none,
-        background=:lightgray,
-        size=(780, 400)
-    )
-
-    # Cumulative shelf heights
-    y_s = vcat([0], cumsum([H_s[s] for s in shelves]))
-
-    # Draw products
-    rect(x, y, w, h) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
-    for s in shelves
-        x = 0
-        for b in blocks
-            for p in P_b[b]
-                stack = max(min(div(H_s[s], H_p[p]), SK_p[p]), 1)
-                for i in 1:n_ps[p, s]
-                    y = 0
-                    for j in 1:stack
-                        plot!(plt, rect(x, y_s[s]+y, W_p[p], H_p[p]),
-                              color=block_colors[b/length(blocks)],
-                        )
-                        y += H_p[p]
-                    end
-                    x += W_p[p]
-                end
-            end
-        end
-    end
-
-    # Draw shelves
-    for s in shelves
-        plot!(plt, [0, W_s[s]], [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
-              color=:black)
-    end
-    plot!(plt, [0, W_s[shelves[end]]], [y_s[end], y_s[end]],
-          color=:black, linestyle=:dash)
-
     return plt
 end

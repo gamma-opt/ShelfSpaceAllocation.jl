@@ -41,7 +41,7 @@ end
 end
 
 """Variables"""
-struct Variables
+@with_kw struct Variables
     # --- Basic Variables ---
     s_p::Array{AbstractFloat}
     e_p::Array{AbstractFloat}
@@ -61,7 +61,7 @@ struct Variables
 end
 
 """Objetives"""
-struct Objectives
+@with_kw struct Objectives
     empty_shelf_space::AbstractFloat
     profit_loss::AbstractFloat
     height_placement_penalty::AbstractFloat
