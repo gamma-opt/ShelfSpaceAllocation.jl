@@ -129,11 +129,9 @@ data(a::JuMP.Containers.DenseAxisArray) = a.data
 - `model::ShelfSpaceAllocationModel`
 """
 function Variables(model::ShelfSpaceAllocationModel)
-    d = Dict(variable => value.(model[variable]) |> data
-             for variable in fieldnames(Variables))
-    Variables(d[:s_p], d[:e_p], d[:o_s], d[:n_ps], d[:y_p], d[:b_bs], d[:m_bm],
-              d[:z_bs], d[:z_bs_f], d[:z_bs_l], d[:x_bs], d[:x_bm], d[:w_bb],
-              d[:v_bm])
+    tup = Tuple(value.(model[variable]) |> data
+                for variable in fieldnames(Variables))
+    Variables(tup...)
 end
 
 """Objetive values from model.
@@ -142,11 +140,9 @@ end
 - `model::ShelfSpaceAllocationModel`
 """
 function Objectives(model::ShelfSpaceAllocationModel)
-    Objectives(
-        value.(model[:empty_shelf_space]),
-        value.(model[:profit_loss]),
-        value.(model[:height_placement_penalty])
-    )
+    tup = Tuple(value.(model[variable]) |> data
+                for variable in fieldnames(Objectives))
+    Objectives(tup...)
 end
 
 """Mixed Integer Linear Program (MILP) formulation of the Shelf Space Allocation
