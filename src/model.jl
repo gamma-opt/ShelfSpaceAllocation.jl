@@ -129,8 +129,7 @@ data(a::JuMP.Containers.DenseAxisArray) = a.data
 - `model::ShelfSpaceAllocationModel`
 """
 function Variables(model::ShelfSpaceAllocationModel)
-    tup = Tuple(value.(model[variable]) |> data
-                for variable in fieldnames(Variables))
+    tup = Tuple(value.(model[i]) |> data for i in fieldnames(Variables))
     Variables(tup...)
 end
 
@@ -140,8 +139,7 @@ end
 - `model::ShelfSpaceAllocationModel`
 """
 function Objectives(model::ShelfSpaceAllocationModel)
-    tup = Tuple(value.(model[variable]) |> data
-                for variable in fieldnames(Objectives))
+    tup = Tuple(value.(model[i]) |> data for i in fieldnames(Objectives))
     Objectives(tup...)
 end
 
