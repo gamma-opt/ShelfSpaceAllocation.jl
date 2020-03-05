@@ -1,4 +1,4 @@
-using JuMP, CSV, JSON, Parameters, DataFrames
+using Parameters, JuMP
 
 """ShelfSpaceAllocationModel type as JuMP.Model"""
 const ShelfSpaceAllocationModel = Model
@@ -11,29 +11,29 @@ end
 """Parameters"""
 @with_kw struct Params
     # --- Sets and Subsets ---
-    products::Array{Integer}
-    shelves::Array{Integer}
-    blocks::Array{Integer}
-    modules::Array{Integer}
-    P_b::Array{Array{Integer}}
-    S_m::Array{Array{Integer}}
+    products::Array{Integer, 1}
+    shelves::Array{Integer, 1}
+    blocks::Array{Integer, 1}
+    modules::Array{Integer, 1}
+    P_b::Array{Array{Integer, 1}, 1}
+    S_m::Array{Array{Integer, 1}, 1}
     # --- Parameters ---
-    G_p::Array{AbstractFloat}
-    H_s::Array{AbstractFloat}
-    L_p::Array{AbstractFloat}
+    G_p::Array{AbstractFloat, 1}
+    H_s::Array{AbstractFloat, 1}
+    L_p::Array{AbstractFloat, 1}
     P_ps::Array{AbstractFloat, 2}
-    D_p::Array{AbstractFloat}
-    N_p_min::Array{AbstractFloat}
-    N_p_max::Array{AbstractFloat}
-    W_p::Array{AbstractFloat}
-    W_s::Array{AbstractFloat}
-    M_p::Array{AbstractFloat}
-    M_s_min::Array{AbstractFloat}
-    M_s_max::Array{AbstractFloat}
-    R_p::Array{AbstractFloat}
-    L_s::Array{Integer}
-    H_p::Array{AbstractFloat}
-    SK_p::Array{AbstractFloat}
+    D_p::Array{AbstractFloat, 1}
+    N_p_min::Array{AbstractFloat, 1}
+    N_p_max::Array{AbstractFloat, 1}
+    W_p::Array{AbstractFloat, 1}
+    W_s::Array{AbstractFloat, 1}
+    M_p::Array{AbstractFloat, 1}
+    M_s_min::Array{AbstractFloat, 1}
+    M_s_max::Array{AbstractFloat, 1}
+    R_p::Array{AbstractFloat, 1}
+    L_s::Array{Integer, 1}
+    H_p::Array{AbstractFloat, 1}
+    SK_p::Array{AbstractFloat, 1}
     SL::AbstractFloat = 0.0
     w1::AbstractFloat = 0.5
     w2::AbstractFloat = 10.0
@@ -43,11 +43,11 @@ end
 """Variables"""
 @with_kw struct Variables
     # --- Basic Variables ---
-    s_p::Array{AbstractFloat}
-    e_p::Array{AbstractFloat}
-    o_s::Array{AbstractFloat}
+    s_p::Array{AbstractFloat, 1}
+    e_p::Array{AbstractFloat, 1}
+    o_s::Array{AbstractFloat, 1}
     n_ps::Array{Integer, 2}
-    y_p::Array{Integer}
+    y_p::Array{Integer, 1}
     # --- Blocking Variables ---
     b_bs::Array{AbstractFloat, 2}
     m_bm::Array{AbstractFloat, 2}
@@ -65,59 +65,6 @@ end
     empty_shelf_space::AbstractFloat
     profit_loss::AbstractFloat
     height_placement_penalty::AbstractFloat
-end
-
-"""Load sets, subsets and parameters from CSV files.
-
-# Arguments
-- `product_path::AbstractString`
-- `shelf_path::AbstractString`
-"""
-function Params(
-        product_path::AbstractString, shelf_path::AbstractString)
-    # Load data from CSV files. Data is read into a DataFrame
-    product_data = CSV.read(product_path) |> DataFrame
-    shelf_data = CSV.read(shelf_path) |> DataFrame
-
-    # Sets and Subsets
-    products = 1:size(product_data, 1)
-    shelves = 1:size(shelf_data, 1)
-
-    # Blocks
-    bfs = product_data.blocking_field
-    P_b = [collect(products)[bfs .== bf] for bf in unique(bfs)]
-    blocks = 1:size(P_b, 1)
-
-    # Modules
-    mds = shelf_data.module
-    S_m = [collect(shelves)[mds .== md] for md in unique(mds)]
-    modules = 1:size(S_m, 1)
-
-    # Return Params struct
-    Params(
-        products = products,
-        shelves = shelves,
-        blocks = blocks,
-        modules = modules,
-        P_b = P_b,
-        S_m = S_m,
-        G_p = product_data.unit_margin,
-        H_s = shelf_data.total_height,
-        L_p = product_data.up_down_order_criteria,
-        P_ps = transpose(shelf_data.total_length) ./ product_data.depth,
-        D_p = product_data.monthly_demand,
-        N_p_min = product_data.min_facing,
-        N_p_max = product_data.max_facing,
-        W_p = product_data.width,
-        W_s = shelf_data.total_width,
-        M_p = product_data.weight,
-        M_s_min = shelf_data.product_min_unit_weight,
-        M_s_max = shelf_data.product_max_unit_weight,
-        R_p = product_data.replenishment_interval,
-        L_s = shelf_data.level,
-        H_p = product_data.height,
-        SK_p = product_data.max_stack
-    )
 end
 
 data(a::Number) = a
@@ -269,16 +216,4 @@ function ShelfSpaceAllocationModel(parameters::Params, specs::Specs)
     end
 
     return model
-end
-
-"""Save object into JSON file.
-
-# Arguments
-- `object`
-- `output_path::AbstractString`: Full filepath, e.g., `path.json`.
-"""
-function save_json(object, filepath::AbstractString)
-    open(filepath, "w") do io
-        JSON.print(io, object)
-    end
 end

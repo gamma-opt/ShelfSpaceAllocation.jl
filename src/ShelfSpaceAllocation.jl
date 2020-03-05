@@ -1,6 +1,7 @@
 module ShelfSpaceAllocation
 
 include("model.jl")
+include("io.jl")
 export ShelfSpaceAllocationModel,
     Specs,
     Params,
