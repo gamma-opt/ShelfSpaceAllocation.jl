@@ -11,13 +11,9 @@ Objectives
 ShelfSpaceAllocationModel(::Params, ::Specs)
 ```
 
-## Input
+## IO
 ```@docs
 Params(::AbstractString, ::AbstractString)
-```
-
-## Output
-```@docs
 Variables(::ShelfSpaceAllocationModel)
 Objectives(::ShelfSpaceAllocationModel)
 save_json
