@@ -52,11 +52,22 @@ optimize!(model, optimizer)
 
 variables = Variables(model)
 objectives = Objectives(model)
+```
 
+Saving values to JSON.
+```julia
 save_json(specs, joinpath(output_dir, "specs.json"))
 save_json(parameters, joinpath(output_dir, "parameters.json"))
 save_json(variables, joinpath(output_dir, "variables.json"))
 save_json(objectives, joinpath(output_dir, "objectives.json"))
+```
+
+Loading values from JSON.
+```julia
+specs = load_json(Specs, joinpath(output_dir, "specs.json"))
+parameters = load_json(Params, joinpath(output_dir, "parameters.json"))
+variables = load_json(Variables, joinpath(output_dir, "variables.json"))
+objectives = load_json(Objectives, joinpath(output_dir, "objectives.json"))
 ```
 
 Inside the `examples` directory, there are two notebooks, [example.ipynb](./examples/example.ipynb) and [heuristics.ipynb](./examples/heuristics.ipynb), which demonstrate how to use this package.
