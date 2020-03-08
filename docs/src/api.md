@@ -17,6 +17,7 @@ Params(::AbstractString, ::AbstractString)
 Variables(::ShelfSpaceAllocationModel)
 Objectives(::ShelfSpaceAllocationModel)
 save_json
+load_json
 ```
 
 ## Plotting

@@ -7,7 +7,8 @@ export ShelfSpaceAllocationModel,
     Params,
     Variables,
     Objectives,
-    save_json
+    save_json,
+    load_json
 
 include("plotting.jl")
 export plot_planogram,
