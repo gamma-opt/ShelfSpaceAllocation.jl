@@ -64,7 +64,7 @@ end
     v_bm::Array{Integer, 2}
 end
 
-"""Objetives"""
+"""Objectives"""
 @with_kw struct Objectives
     empty_shelf_space::AbstractFloat
     profit_loss::AbstractFloat

@@ -11,7 +11,7 @@ makedocs(
     modules = [ShelfSpaceAllocation],
     authors = "Jaan Tollander de Balsch, Fabricio Oliveira",
     pages = [
-        "Home" => "index.md",
+        "Model" => "index.md",
         "plotting.md",
         "heuristics.md",
         "api.md"

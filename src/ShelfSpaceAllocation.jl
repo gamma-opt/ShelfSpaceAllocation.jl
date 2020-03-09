@@ -14,6 +14,7 @@ include("plotting.jl")
 export plot_planogram,
     plot_planograms,
     plot_planogram_no_blocks,
+    plot_planograms_no_blocks,
     plot_block_allocation,
     plot_block_allocations,
     plot_product_facings,

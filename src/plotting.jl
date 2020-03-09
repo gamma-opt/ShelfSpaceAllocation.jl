@@ -46,7 +46,7 @@ function plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p
     return plt
 end
 
-"""Creates a planogram which visualizes the product placement on the shelves."""
+"""Creates a planogram which visualizes the product placement on the shelves without blocks."""
 function plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
     # Initialize the plot
     plt = plot(
@@ -95,6 +95,7 @@ function plot_planograms(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s
      return [plot_planogram(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs) for shelves′ in S_m]
 end
 
+"""Create a planogram for each module without blocks."""
 function plot_planograms_no_blocks(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
     return [plot_planogram_no_blocks(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s) for shelves′ in S_m]
 end
