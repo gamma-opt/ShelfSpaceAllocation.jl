@@ -2,6 +2,38 @@ using CSV, JSON, DataFrames
 
 """Load sets, subsets and parameters from CSV files.
 
+Each CSV file in `product_path` contains following attributes:
+
+- `product_id`
+- `category_id`
+- `brand_id`
+- `width`
+- `height`
+- `depth`
+- `weight`
+- `monthly_demand`
+- `replenishment_interval`
+- `price`
+- `unit_margin`
+- `blocking_field`
+- `min_facing`
+- `max_facing`
+- `max_stack`
+- `up_down_order_criteria`
+
+Each CSV file in `shelf_path` contains following attributes:
+
+- `module`
+- `id`
+- `level`
+- `total_width`
+- `total_height`
+- `total_length`
+- `product_min_unit_weight`
+- `product_max_unit_weight`
+
+Examples of input parameters can found inside `examples/instances` directory.
+
 # Arguments
 - `product_path::AbstractString`
 - `shelf_path::AbstractString`

@@ -8,14 +8,19 @@ Specs
 Params
 Variables
 Objectives
+Variables(::ShelfSpaceAllocationModel)
+Objectives(::ShelfSpaceAllocationModel)
 ShelfSpaceAllocationModel(::Params, ::Specs)
 ```
 
 ## IO
+!!! note
+    JSON stores multi-dimensional arrays as nested arrays. If we load an array `a` whose elements are accessed `a[i, j, k]`, the elements of the nested array are accessed in reverse order `a[k][j][i]`. However, the function [`load_json`](@ref) converts the nested arrays back to multi-dimensional arrays.
+
+For input and output of numerical values, simple plain text formats CSV and JSON are used. CSV is used for representing tabular data and JSON is used for representing non-tabular, dictionary-like, data.
+
 ```@docs
 Params(::AbstractString, ::AbstractString)
-Variables(::ShelfSpaceAllocationModel)
-Objectives(::ShelfSpaceAllocationModel)
 save_json
 load_json
 ```
@@ -38,8 +43,8 @@ plot_allocation_percentage
 -  $p∈P$ -- A set of **products**.
 -  $s∈S$ -- A set of **shelves**.
 -  $b∈B$ -- A set of **blocks**. Blocks are an index of mutually exclusive subsets of products.
--  $P_b⊆P$ -- A **block** is a subset of products.
 -  $m∈M$ -- A set of **modules**. Modules are an index of a mutually exclusive subset of shelves.
+-  $P_b⊆P$ -- A **block** is a subset of products.
 -  $S_m⊆S$ -- A **module** is a subset of shelves.
 
 *Parameters*

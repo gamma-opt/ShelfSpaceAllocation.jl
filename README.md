@@ -70,9 +70,6 @@ variables = load_json(Variables, joinpath(output_dir, "variables.json"))
 objectives = load_json(Objectives, joinpath(output_dir, "objectives.json"))
 ```
 
-Inside the `examples` directory, there are two notebooks, [example.ipynb](./examples/example.ipynb) and [heuristics.ipynb](./examples/heuristics.ipynb), which demonstrate how to use this package.
-
-
 ## Installation
 Install the [Julia language](https://julialang.org/) and then install this package.
 

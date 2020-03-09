@@ -12,9 +12,7 @@ makedocs(
     authors = "Jaan Tollander de Balsch, Fabricio Oliveira",
     pages = [
         "Home" => "index.md",
-        "model.md",
         "plotting.md",
-        "io.md",
         "heuristics.md",
         "api.md"
     ]

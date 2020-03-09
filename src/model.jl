@@ -18,22 +18,26 @@ end
     P_b::Array{Array{Integer, 1}, 1}
     S_m::Array{Array{Integer, 1}, 1}
     # --- Parameters ---
-    G_p::Array{AbstractFloat, 1}
-    H_s::Array{AbstractFloat, 1}
-    L_p::Array{AbstractFloat, 1}
-    P_ps::Array{AbstractFloat, 2}
-    D_p::Array{AbstractFloat, 1}
+    # Products
     N_p_min::Array{AbstractFloat, 1}
     N_p_max::Array{AbstractFloat, 1}
+    G_p::Array{AbstractFloat, 1}
+    R_p::Array{AbstractFloat, 1}
+    D_p::Array{AbstractFloat, 1}
+    L_p::Array{AbstractFloat, 1}
     W_p::Array{AbstractFloat, 1}
-    W_s::Array{AbstractFloat, 1}
+    H_p::Array{AbstractFloat, 1}
     M_p::Array{AbstractFloat, 1}
+    SK_p::Array{AbstractFloat, 1}
+    # Shelves
     M_s_min::Array{AbstractFloat, 1}
     M_s_max::Array{AbstractFloat, 1}
-    R_p::Array{AbstractFloat, 1}
+    W_s::Array{AbstractFloat, 1}
+    H_s::Array{AbstractFloat, 1}
     L_s::Array{Integer, 1}
-    H_p::Array{AbstractFloat, 1}
-    SK_p::Array{AbstractFloat, 1}
+    # Product-shelves
+    P_ps::Array{AbstractFloat, 2}
+    # Constants
     SL::AbstractFloat = 0.0
     w1::AbstractFloat = 0.5
     w2::AbstractFloat = 10.0

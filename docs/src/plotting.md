@@ -21,15 +21,15 @@ Visualizes the number of product facings $∑_s n_{p,s}$ allocated per product. 
 
 Visualizes the sales $s_p$ per product. The opaque color indicates the demand $D_p$ per product.
 
-## Fill Amount
+## Allocation Amount
 ![](figures/results/fill_amount.svg)
 
-Fill amount visualizes the total amount of products facings $∑_{p∈P_b,s∈S} n_{p,s}$ allocated to the shelves per block.
+Allocation amount visualizes the total amount of products facings $∑_{p∈P_b,s∈S} n_{p,s}$ allocated to the shelves per block.
 
-## Fill Percentage
+## Allocation Percentage
 ![](figures/results/fill_percentage.svg)
 
-Fill percentage visualizes the relative amount of product facings allocated to the shelves per block. Calculated by dividing the absolute amount of product facing allocated per block by the number of products that could be allocated to the shelves per block if there were no products from other blocks.
+Allocation percentage visualizes the relative amount of product facings allocated to the shelves per block. Calculated by dividing the absolute amount of product facing allocated per block by the number of products that could be allocated to the shelves per block if there were no products from other blocks.
 
 ## References
 [^Rouse2010]: Rouse, M. (2010). What is planogram? Retrieved from [https://whatis.techtarget.com/definition/planogram](https://whatis.techtarget.com/definition/planogram)
