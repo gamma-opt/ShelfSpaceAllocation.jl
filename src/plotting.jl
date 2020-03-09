@@ -219,9 +219,9 @@ end
 
 """Plot the percentage of allocated facings of maximum facings per block."""
 function plot_allocation_percentage(parameters::Params, n_ps, optimizer)
-    @unpack products, shelves, blocks, modules, P_b, S_m, G_p, H_s, L_p,
-        P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min, M_s_max, R_p, L_s,
-        H_p, SK_p, SL, w1, w2, w3 = parameters
+    @unpack products, shelves, blocks, modules, P_b, S_m, N_p_min, N_p_max,
+            G_p, R_p, D_p, L_p, W_p, H_p, M_p, SK_p, M_s_min, M_s_max, W_s,
+            H_s, L_s, P_ps, SL, w1, w2, w3 = parameters
 
     pr = [sum(n_ps[p, s] for p in P_b[b] for s in shelves) for b in blocks]
     pr_max = []
@@ -229,8 +229,8 @@ function plot_allocation_percentage(parameters::Params, n_ps, optimizer)
         specs = Specs(blocking=false)
         parameters2 = Params(
             P_b[b], shelves, Integer[], Integer[], [Integer[]], [Integer[]],
-            G_p, H_s, L_p, P_ps, D_p, N_p_min, N_p_max, W_p, W_s, M_p, M_s_min,
-            M_s_max, R_p, L_s, H_p, SK_p, SL, w1, w2, w3)
+            N_p_min, N_p_max, G_p, R_p, D_p, L_p, W_p, H_p, M_p, SK_p, M_s_min,
+            M_s_max, W_s, H_s, L_s, P_ps, SL, w1, w2, w3)
         model = ShelfSpaceAllocationModel(parameters2, specs)
         optimize!(model, optimizer)
         n_ps_max = value.(model[:n_ps])
