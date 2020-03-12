@@ -91,18 +91,19 @@ end
 
 
 # --- Arguments ---
-case = "small"
-partition_size = 3
+case = "large"
+partition_size = Dict(
+    "small" => 3,
+    "medium" => 2,
+    "large" => 6
+)[case]
+# TODO: block partition order: increasing/decreasing
 product_path = joinpath(@__DIR__, "instances", case, "products.csv")
 shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
 output_dir = joinpath(@__DIR__, "output_heuristics", case, string(Dates.now()))
 
 @info "Creating output directory"
 mkpath(output_dir)
-
-# io = open(joinpath(output_dir, "shelf_space_allocation.log"), "w+")
-# logger = SimpleLogger(io)
-# global_logger(logger)
 
 @info "Arguments" product_path shelf_path output_dir
 
@@ -143,7 +144,8 @@ amounts = round.(
     [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks])
 
 # Blocks from highest to lowest amount of product allocated per block.
-block_indices = reverse(sortperm(amounts))
+# block_indices = reverse(sortperm(amounts))
+block_indices = sortperm(amounts)
 
 # Partition the blocks into arrays of partition size
 block_partitions = partition(partition_size, block_indices)
@@ -188,54 +190,49 @@ save_json(variables3, joinpath(output_dir, "variables3.json"))
 save_json(objectives3, joinpath(output_dir, "objectives3.json"))
 
 
+@info "Plotting"
+
 # --- Plotting 1 ---
-@unpack n_ps, o_s = variables1
+p1 = plot_planograms_no_blocks(parameters, variables1)
+for (i, p) in enumerate(p1)
+    savefig(p, joinpath(output_dir, "planogram_no_blocks_$i.svg"))
+end
 
-# TODO: handle modules
-p1 = plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
-savefig(p1, joinpath(output_dir, "planogram_no_blocks.svg"))
-
-p2 = plot_allocation_amount(shelves, blocks, P_b, n_ps)
+p2 = plot_allocation_amount(parameters, variables1)
 savefig(p2, joinpath(output_dir, "allocation_amount_no_blocks.svg"))
 
 
 # --- Plotting 2 ---
-@unpack n_ps, o_s, b_bs, x_bs, z_bs = variables2
-
-p1 = plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
-savefig(p1, joinpath(output_dir, "planogram_relax_and_fix.svg"))
-
-p2 = plot_block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-savefig(p2, joinpath(output_dir, "block_allocation_relax_and_fix.svg"))
+p2 = plot_block_allocations(parameters, variables2)
+for (i, p) in enumerate(p2)
+    savefig(p, joinpath(output_dir, "block_allocation_relax_and_fix_$i.svg"))
+end
 
 
 # --- Plotting 3 ---
-@unpack n_ps, o_s, x_bs, z_bs, s_p = variables3
+p1 = plot_planograms(parameters, variables3)
+for (i, p) in enumerate(p1)
+    savefig(p, joinpath(output_dir, "planogram_$i.svg"))
+end
 
-@info "Plotting planogram"
-p1 = plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
-savefig(p1, joinpath(output_dir, "planogram.svg"))
+p2 = plot_block_allocations(parameters, variables3)
+for (i, p) in enumerate(p2)
+    savefig(p, joinpath(output_dir, "block_allocation_$i.svg"))
+end
 
-@info "Plotting block allocation"
-p2 = plot_block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-savefig(p2, joinpath(output_dir, "block_allocation.svg"))
-
-@info "Plotting product facings"
-p3 = plot_product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
+p3 = plot_product_facings(parameters, variables3)
 savefig(p3, joinpath(output_dir, "product_facings.svg"))
 
-@info "Plotting demand and sales"
-p4 = plot_demand_and_sales(blocks, P_b, D_p, s_p)
+p4 = plot_demand_and_sales(parameters, variables3)
 savefig(p4, joinpath(output_dir, "demand_and_sales.svg"))
 
-@info "Plotting allocation amount"
-p5 = plot_allocation_amount(shelves, blocks, P_b, n_ps)
+p = plot_demand_sales_percentage(parameters, variables3)
+savefig(p, joinpath(output_dir, "demand_sales_percentage.svg"))
+
+p5 = plot_allocation_amount(parameters, variables3)
 savefig(p5, joinpath(output_dir, "allocation_amount.svg"))
 
-@info "Plotting allocation percentage"
 p6 = plot_allocation_percentage(
-    parameters, n_ps,
+    parameters, variables3,
     with_optimizer(Gurobi.Optimizer, TimeLimit=60, LogToConsole=false))
 savefig(p6, joinpath(output_dir, "allocation_percentage.svg"))
-
-# close(io)

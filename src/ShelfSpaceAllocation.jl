@@ -19,6 +19,7 @@ export plot_planogram,
     plot_block_allocations,
     plot_product_facings,
     plot_demand_and_sales,
+    plot_demand_sales_percentage,
     plot_allocation_amount,
     plot_allocation_percentage
 

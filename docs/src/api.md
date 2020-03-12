@@ -17,7 +17,7 @@ ShelfSpaceAllocationModel(::Params, ::Specs)
 !!! note
     JSON stores multi-dimensional arrays as nested arrays. If we load an array `a` whose elements are accessed `a[i, j, k]`, the elements of the nested array are accessed in reverse order `a[k][j][i]`. However, the function [`load_json`](@ref) converts the nested arrays back to multi-dimensional arrays.
 
-For input and output of numerical values, simple plain text formats CSV and JSON are used. CSV is used for representing tabular data and JSON is used for representing non-tabular, dictionary-like, data.
+We use simple plain text formats CSV and JSON for input and output of numerical values.
 
 ```@docs
 Params(::AbstractString, ::AbstractString)
@@ -35,6 +35,7 @@ plot_block_allocation
 plot_block_allocations
 plot_product_facings
 plot_demand_and_sales
+plot_demand_sales_percentage
 plot_allocation_amount
 plot_allocation_percentage
 ```
@@ -65,14 +66,13 @@ plot_allocation_percentage
 -  $H_s$ -- Height of shelf $s$
 -  $L_p$ -- Shelf level, counted from bottom to top
 -  $SL$ -- Slack, maximum difference in block starting points and between block max and min width
+-  $w_1=0.5$
+-  $w_2=10.0$
+-  $w_3=0.1$
 
 *Objective*
 
 $$\min \left(w_1 ∑_s o_s + w_2 ∑_p G_p e_p + w_3 ∑_{p,s} L_p L_s n_{p,s}\right)$$
-
--  $w_1=0.5$
--  $w_2=10.0$
--  $w_3=0.1$
 
 *Basic Variables*
 

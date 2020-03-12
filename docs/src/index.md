@@ -1,11 +1,13 @@
 # ShelfSpaceAllocation.jl
-![](figures/results/planogram.svg)
+![](figures/planogram.svg)
 
 This section explains the mathematical formulation of the *mixed integer linear program* for solving the *shelf space allocation problem*. Ph.D. thesis by [^Teresa2015] contains a good introduction to the shelf space allocation problem. We recommend to read the chapters 1.3 and 3 as they relate to the model we present here. Book by [^Williams2013] covers how to model problems using mathematical programming including linear and integer programming.
 
-The objective of [`ShelfSpaceAllocationModel`](@ref) presented here is to minimize losses while taking into account consumer demand for products, minimize empty space on shelves and place products at preferred heights. The model is tailored towards smaller retail stores for which the shelf space accounts for a large portion of the total inventory space.
+The objective of [`ShelfSpaceAllocationModel`](@ref) is produce an allocation for product to the shelves such that it minimizes losses while taking into account consumer demand for products, minimize empty space on shelves and place products at preferred heights. The model is tailored towards smaller retail stores for which the shelf space accounts for a large portion of the total inventory space. The resulting allocation can be used to product a [Planogram](@ref) for the retailers.
 
-The model also contains different types of constraints:
+> *A planogram is a diagram that shows how and where specific retail products should be placed on retail shelves or displays in order to increase customer purchases.* [^Rouse2010]
+
+The model contains following constraints.
 
 * *Integrality constraints* -- The number of products allocated to each shelf must be integral.
 * *Physical constraints* -- Constraints limiting the physical dimensions, e.g. width, height, and weight, of the products on the shelves.
@@ -14,7 +16,6 @@ The model also contains different types of constraints:
 
 We can create an instance of the model using [`ShelfSpaceAllocationModel(::Params, ::Specs)`](@ref).
 
-The output values from the optimization are used to produce a [Planogram](@ref), which is a visualization of the product placement on to the shelves.
 
 ## Sets and Subsets
 Shelf space allocation problem consists of following sets and subsets:
@@ -136,7 +137,7 @@ $$∑_p W_p n_{p,s} + o_s = W_s,\quad ∀s$$
 We use [`Variables`](@ref) struct to store the variable values after optimization. We can query the values from the model using [`Variables(::ShelfSpaceAllocationModel)`](@ref) method.
 
 ## Block Variables and Constraints
-![](figures/results/planogram.svg)
+![](figures/planogram.svg)
 
 We use the [`Specs`](@ref) struct to control whether we include block constraints into the model.
 
@@ -253,3 +254,5 @@ $$∑_m v_{b,m} ≤ 1,\quad ∀b$$
 [^Teresa2015]: Teresa, M. (2015). The Retail Shelf Space Allocation Problem: New Optimization Methods Applied to a Supermarket Chain.
 
 [^Williams2013]: Williams, H. P. (2013). Model building in mathematical programming. John Wiley & Sons.
+
+[^Rouse2010]: Rouse, M. (2010). What is planogram? Retrieved from [https://whatis.techtarget.com/definition/planogram](https://whatis.techtarget.com/definition/planogram)

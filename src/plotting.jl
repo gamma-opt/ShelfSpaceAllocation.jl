@@ -69,7 +69,7 @@ function plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p,
                     y = 0
                     for j in 1:stack
                         plot!(plt,
-                              rect(x, y_s[s]+y, W_p[p], H_p[p]),
+                              rect(x, y_s[s-shelves[1]+1]+y, W_p[p], H_p[p]),
                               color=block_colors[b/length(blocks)])
                         y += H_p[p]
                     end
@@ -91,13 +91,22 @@ function plot_planogram_no_blocks(products, shelves, blocks, P_b, H_s, H_p, W_p,
 end
 
 """Create a planogram for each module."""
-function plot_planograms(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
-     return [plot_planogram(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs) for shelves′ in S_m]
+function plot_planograms(parameters::Params, variables::Variables)
+    @unpack products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p =
+            parameters
+    @unpack n_ps, o_s, x_bs = variables
+    return [plot_planogram(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s,
+                           SK_p, n_ps, o_s, x_bs) for shelves′ in S_m]
 end
 
 """Create a planogram for each module without blocks."""
-function plot_planograms_no_blocks(products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s)
-    return [plot_planogram_no_blocks(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s) for shelves′ in S_m]
+function plot_planograms_no_blocks(parameters::Params, variables::Variables)
+    @unpack products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p =
+            parameters
+    @unpack n_ps, o_s = variables
+    return [plot_planogram_no_blocks(
+                products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p,
+                n_ps, o_s) for shelves′ in S_m]
 end
 
 """Block starting locations and widths."""
@@ -136,12 +145,18 @@ function plot_block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
 end
 
 """Create block_allocation for each module."""
-function plot_block_allocations(shelves, blocks, S_m, H_s, W_s, b_bs, x_bs, z_bs)
-    return [plot_block_allocation(shelves′, blocks, H_s, W_s, b_bs, x_bs, z_bs) for shelves′ in S_m]
+function plot_block_allocations(parameters::Params, variables::Variables)
+    @unpack blocks, S_m, H_s, W_s = parameters
+    @unpack b_bs, x_bs, z_bs = variables
+    return [plot_block_allocation(shelves′, blocks, H_s, W_s, b_bs, x_bs, z_bs)
+                                  for shelves′ in S_m]
 end
 
 """Creates a barchart of number of product facings per product."""
-function plot_product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
+function plot_product_facings(parameters::Params, variables::Variables)
+    @unpack products, shelves, blocks, P_b, N_p_max = parameters
+    @unpack n_ps = variables
+
     colors = [block_colors[b/length(blocks)] for b in blocks for p in P_b[b]]
 
     # Plot maximum number of facings.
@@ -173,7 +188,11 @@ function plot_product_facings(products, shelves, blocks, P_b, N_p_max, n_ps)
 end
 
 """Bar chart of demand and sales per product."""
-function plot_demand_and_sales(blocks, P_b, D_p, s_p)
+function plot_demand_and_sales(parameters::Params, variables::Variables)
+    @unpack blocks, P_b, D_p = parameters
+    @unpack s_p = variables
+
+    # FIXME?
     colors = [block_colors[b/length(blocks)] for b in blocks for p in P_b[b]]
 
     # Plot demand of products
@@ -202,8 +221,29 @@ function plot_demand_and_sales(blocks, P_b, D_p, s_p)
     return plt
 end
 
+"""Percentage of demand satisfied by sales per block."""
+function plot_demand_sales_percentage(parameters::Params, variables::Variables)
+    @unpack blocks, P_b, D_p = parameters
+    @unpack s_p = variables
+
+    pr = [sum(s_p[p] for p in P_b[b])/sum(D_p[p] for p in P_b[b])
+          for b in blocks]
+    bar(
+        pr,
+        color=[block_colors[b/length(blocks)] for b in blocks],
+        ylims=(0, 1),
+        xlabel=L"$b$",
+        xticks=1:1:size(blocks, 1),
+        legend=:none,
+        background=:lightgray,
+    )
+end
+
 """Plot the total amount of allocated facings per product per block."""
-function plot_allocation_amount(shelves, blocks, P_b, n_ps)
+function plot_allocation_amount(parameters::Params, variables::Variables)
+    @unpack shelves, blocks, P_b = parameters
+    @unpack n_ps = variables
+
     pr = [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks]
     plt = bar(
         pr,
@@ -218,10 +258,12 @@ function plot_allocation_amount(shelves, blocks, P_b, n_ps)
 end
 
 """Plot the percentage of allocated facings of maximum facings per block."""
-function plot_allocation_percentage(parameters::Params, n_ps, optimizer)
+function plot_allocation_percentage(parameters::Params, variables::Variables,
+                                    optimizer::OptimizerFactory)
     @unpack products, shelves, blocks, modules, P_b, S_m, N_p_min, N_p_max,
             G_p, R_p, D_p, L_p, W_p, H_p, M_p, SK_p, M_s_min, M_s_max, W_s,
             H_s, L_s, P_ps, SL, w1, w2, w3 = parameters
+    @unpack n_ps = variables
 
     pr = [sum(n_ps[p, s] for p in P_b[b] for s in shelves) for b in blocks]
     pr_max = []
