@@ -73,26 +73,38 @@ end
 
 data(a::Number) = a
 data(a::JuMP.Containers.DenseAxisArray) = a.data
+round_int(x::AbstractFloat) = Integer(round(x))
+convert_int(x, t::Type{<:Integer}) = round_int(x)
+convert_int(x, t::Type{Array{T, N}}) where T <: Integer where N = round_int.(x)
+convert_int(x, t) = x
+
+"""Values from model to dtype.
+
+# Arguments
+- `dtype` (DataType)
+- `model::Model`
+"""
+function model_to_dtype(dtype, model::Model)
+    fields = []
+    for (n, t) in zip(fieldnames(dtype), fieldtypes(dtype))
+        push!(fields, value.(model[n]) |> data |> x -> convert_int(x, t))
+    end
+    dtype(fields...)
+end
 
 """Variable values from model.
 
 # Arguments
 - `model::ShelfSpaceAllocationModel`
 """
-function Variables(model::ShelfSpaceAllocationModel)
-    tup = Tuple(value.(model[i]) |> data for i in fieldnames(Variables))
-    Variables(tup...)
-end
+Variables(model::ShelfSpaceAllocationModel) = model_to_dtype(Variables, model)
 
 """Objetive values from model.
 
 # Arguments
 - `model::ShelfSpaceAllocationModel`
 """
-function Objectives(model::ShelfSpaceAllocationModel)
-    tup = Tuple(value.(model[i]) |> data for i in fieldnames(Objectives))
-    Objectives(tup...)
-end
+Objectives(model::ShelfSpaceAllocationModel) = model_to_dtype(Objectives, model)
 
 """Mixed Integer Linear Program (MILP) formulation of the Shelf Space Allocation
 Problem (SSAP).
@@ -129,11 +141,9 @@ function ShelfSpaceAllocationModel(parameters::Params, specs::Specs)
     @variable(model, v_bm[blocks, modules], Bin)
 
     # --- Height and weight constraints ---
-    for p in products
-        for s in shelves
-            if (H_p[p] > H_s[s]) | (M_p[p] > M_s_max[s])
-                fix(n_ps[p, s], 0, force=true)
-            end
+    for p in products, s in shelves
+        if (H_p[p] > H_s[s]) | (M_p[p] > M_s_max[s])
+            fix(n_ps[p, s], 0, force=true)
         end
     end
 
