@@ -77,7 +77,7 @@ savefig(p, joinpath(output_dir, "product_facings.svg"))
 p = plot_demand_and_sales(parameters, variables)
 savefig(p, joinpath(output_dir, "demand_and_sales.svg"))
 
-p = plot_demand_sales_percentage(parameters, variables3)
+p = plot_demand_sales_percentage(parameters, variables)
 savefig(p, joinpath(output_dir, "demand_sales_percentage.svg"))
 
 p = plot_allocation_amount(parameters, variables)
