@@ -14,11 +14,11 @@ The model contains following constraints.
 * *Control constraints* -- Constraints which can be controlled by changing parameters values, such as the minimum number of product facings for a particular product or the preferred height placement for a product.
 * *Block constraints* -- Constraints products which belong to the same category to be placed together in rectangular shapes.
 
-We can create an instance of the model using [`ShelfSpaceAllocationModel(::Params, ::Specs)`](@ref).
+We can create an instance of the model using [`ShelfSpaceAllocationModel(::Params, ::Specs)`](@ref). We use the [`Specs`](@ref) struct to control whether we include block constraints into the model.
 
 
 ## Sets and Subsets
-Shelf space allocation problem consists of following sets and subsets:
+Shelf space allocation problem consists of following *sets and subsets*:
 
 -  $p∈P$ -- A set of **products**.
 -  $s∈S$ -- A set of **shelves**.
@@ -30,7 +30,7 @@ Shelf space allocation problem consists of following sets and subsets:
 ## Parameters
 Both products and shelves have several attributes associated with them. These attributes are also referred to as parameters since their values are given by the user. They are denoted using capital letters.
 
-Products
+*Product* parameters:
 
 -  $N_p^{min}$, $N_p^{max}$ -- The minimum and maximum number of facings for product $p$
 -  $G_p$ -- Unit profit of product $p$; used as shortage penalty (treated to be $\max\{0, G_p\}$
@@ -42,18 +42,18 @@ Products
 -  $M_p$ -- Unit weight of product $p$
 -  $SK_p$ -- Max stack per product $p$
 
-Shelves
+*Shelf* parameters:
 
 -  $M_s^{min}$, $M_s^{max}$ -- The minimum and maximum unit weight on shelf $s$
 -  $W_s$ -- Width of shelf $s$
 -  $H_s$ -- Height of shelf $s$
 -  $L_s$ -- Shelf level, counted from bottom to top
 
-Product-shelves
+*Product-shelf* parameters:
 
 -  $P_{p,s}$ -- Number units per facing of product $p$ on shelf $s$
 
-Constants
+*Constant* parameters:
 
 -  $SL$ -- Slack, maximum difference in block starting points and between block max and min width, default $0.0$
 -  $w_1$ -- Objective weight for `empty_space_penalty`, default $0.5$
@@ -138,8 +138,6 @@ We use [`Variables`](@ref) struct to store the variable values after optimizatio
 
 ## Block Variables and Constraints
 ![](figures/planogram.svg)
-
-We use the [`Specs`](@ref) struct to control whether we include block constraints into the model.
 
 The width of block $b$ on shelf $s$ must be larger or equal to the sum of the widths of products $P_b$ on the shelf $s$
 

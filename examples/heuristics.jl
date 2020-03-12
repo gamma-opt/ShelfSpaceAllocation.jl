@@ -91,13 +91,18 @@ end
 
 
 # --- Arguments ---
-case = "large"
+# Cases: "small", "medium", "large"
+case = "medium"
 partition_size = Dict(
-    "small" => 3,
+    "small" => 4,
     "medium" => 2,
     "large" => 6
 )[case]
-# TODO: block partition order: increasing/decreasing
+block_partition_order = Dict(
+    "small" => "decreasing",
+    "medium" => "decreasing",
+    "large" => "increasing"
+)[case]
 product_path = joinpath(@__DIR__, "instances", case, "products.csv")
 shelf_path = joinpath(@__DIR__, "instances", case, "shelves.csv")
 output_dir = joinpath(@__DIR__, "output_heuristics", case, string(Dates.now()))
@@ -110,11 +115,6 @@ mkpath(output_dir)
 @info "Loading parameters"
 parameters = Params(product_path, shelf_path)
 save_json(parameters, joinpath(output_dir, "parameters.json"))
-
-# We need the raw values later.
-@unpack products, shelves, blocks, modules, P_b, S_m, N_p_min, N_p_max,
-        G_p, R_p, D_p, L_p, W_p, H_p, M_p, SK_p, M_s_min, M_s_max, W_s,
-        H_s, L_s, P_ps, SL, w1, w2, w3 = parameters
 
 
 # --- Space allocation without blocks ---
@@ -137,15 +137,22 @@ save_json(objectives1, joinpath(output_dir, "objectives1.json"))
 
 # --- Block partitions ---
 @info "Define block partitions"
+
+@unpack shelves, blocks, P_b = parameters
 n_ps = value.(model1[:n_ps])
 
 # Amount of products allocated per block.
 amounts = round.(
     [sum(n_ps[p, s] for s in shelves for p in P_b[b]) for b in blocks])
 
-# Blocks from highest to lowest amount of product allocated per block.
-# block_indices = reverse(sortperm(amounts))
-block_indices = sortperm(amounts)
+if block_partition_order == "decreasing"
+    # Blocks from highest to lowest amount of product allocated per block.
+    block_indices = reverse(sortperm(amounts))
+elseif block_partition_order == "increasing"
+    block_indices = sortperm(amounts)
+else
+    error("No block partition order: $block_partition_order")
+end
 
 # Partition the blocks into arrays of partition size
 block_partitions = partition(partition_size, block_indices)
@@ -177,7 +184,7 @@ model3 = fix_and_optimize(
 
 optimizer3 = with_optimizer(
     Gurobi.Optimizer,
-    TimeLimit=60,
+    TimeLimit=2*60,
     LogFile=joinpath(output_dir, "grb_fix_and_optimize.log"),
     MIPFocus=3,
     MIPGap=false

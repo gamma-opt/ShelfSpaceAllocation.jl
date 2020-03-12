@@ -26,10 +26,10 @@ specs = Specs(blocking=true)
 @info "Creating the model"
 model = ShelfSpaceAllocationModel(parameters, specs)
 
-# Fix the block width
-using JuMP
-@constraint(model, [b = parameters.blocks, s = parameters.shelves],
-    model[:b_bs][b, s] == parameters.W_s[s]/2 * model[:z_bs][b, s]);
+# Fix the block width for medium case
+# using JuMP
+# @constraint(model, [b = parameters.blocks, s = parameters.shelves],
+#     model[:b_bs][b, s] == parameters.W_s[s]/2 * model[:z_bs][b, s]);
 
 @info "Starting the optimization"
 using JuMP, Gurobi
