@@ -1,5 +1,5 @@
 # ShelfSpaceAllocation
-![](docs/src/figures/results/planogram.svg)
+![](docs/src/figures/planogram.svg)
 
 This package contains an optimization model for solving the *shelf space allocation problem (SSAP)* in the context of retail stores, formulated as *mixed-integer linear program (MILP)*. We intended the package for both developing and running the model. It includes the model, visualization capabilities, input/output related functions, and example instances. The [documentation](http://jaantollander.com/ShelfSpaceAllocation.jl/) covers how to use the package, its functionalities, and the model in detail.
 
@@ -70,6 +70,8 @@ variables = load_json(Variables, joinpath(output_dir, "variables.json"))
 objectives = load_json(Objectives, joinpath(output_dir, "objectives.json"))
 ```
 
+Example of *relax-and-fix* and *fix-and-optimize* heuristics is available in  [`heuristics.jl`](./examples/heuristics.jl) file.
+
 ## Installation
 Install the [Julia language](https://julialang.org/) and then install this package.
 
@@ -95,7 +97,7 @@ Install solver such as Gurobi.
 
 
 ## Installing Solver
-The `shelf_space_allocation_model` function returns the mathematical model which is implemented using `JuMP.jl`. It's up to the user to choose a suitable solver for solving the MILP model. For small instance GLPK is sufficient but for large instances, commercial solver such as Gurobi or CPLEX is recommended.
+It's up to the user to choose a suitable solver for solving the JuMP model. For small instance GLPK is sufficient but for large instances, commercial solver such as Gurobi or CPLEX is recommended.
 
 Gurobi is a powerful commercial optimizer which provides a free academic license. Gurobi can be interfaced with Julia using [`Gurobi.jl`](https://github.com/JuliaOpt/Gurobi.jl). Here are the steps to install Julia and Gurobi to run the program:
 
