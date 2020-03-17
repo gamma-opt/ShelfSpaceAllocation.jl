@@ -21,7 +21,7 @@ mkpath(output_dir)
 
 @info "Loading parameters"
 parameters = Params(product_path, shelf_path)
-specs = Specs(blocking=true)
+specs = Specs(height_placement=false, blocking=true)
 
 @info "Creating the model"
 model = ShelfSpaceAllocationModel(parameters, specs)
@@ -64,11 +64,6 @@ using Plots, Parameters
 ps = plot_planograms(parameters, variables)
 for (i, p) in enumerate(ps)
     savefig(p, joinpath(output_dir, "planogram_$i.svg"))
-end
-
-ps = plot_block_allocations(parameters, variables)
-for (i, p) in enumerate(ps)
-    savefig(p, joinpath(output_dir, "block_allocation_$i.svg"))
 end
 
 p = plot_product_facings(parameters, variables)

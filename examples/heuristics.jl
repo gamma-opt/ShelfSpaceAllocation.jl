@@ -18,18 +18,17 @@ function partition(n::Integer, array::Array{T}):: Array{Array{T}} where T
 end
 
 """Relax-and-fix heuristic."""
-function relax_and_fix(parameters::Params, block_partitions, optimizer)
+function relax_and_fix(parameters::Params, specs::Specs, block_partitions, optimizer)
     # Remember fixed blocks and values
     relaxed_blocks = block_partitions[2:end]
     # TODO: test fixing related n_ps variables too for faster runtime
     fixed_blocks = []
     z_bs = []
-    x_bs = []
     b_bs = []
     model = ShelfSpaceAllocationModel()
     for block in block_partitions
         # Solve the shelf space allocation model with a subset of blocks
-        model = ShelfSpaceAllocationModel(parameters, Specs(blocking=true))
+        model = ShelfSpaceAllocationModel(parameters, specs)
 
         # Relaxed values
         for relaxed_block in relaxed_blocks
@@ -44,7 +43,6 @@ function relax_and_fix(parameters::Params, block_partitions, optimizer)
         for (i, fixed_block) in enumerate(fixed_blocks)
             for b in fixed_block, s in parameters.shelves
                 unset_binary(model[:z_bs][b, s])
-                fix(model[:x_bs][b, s], x_bs[i][b, s], force=true)
                 fix(model[:b_bs][b, s], b_bs[i][b, s], force=true)
                 fix(model[:z_bs][b, s], z_bs[i][b, s], force=true)
             end
@@ -59,9 +57,7 @@ function relax_and_fix(parameters::Params, block_partitions, optimizer)
         # Decrease relaxed blocks
         relaxed_blocks = relaxed_blocks[2:end]
 
-        # TODO: move x_bs as far left as possible without overlapping
         push!(fixed_blocks, block)
-        push!(x_bs, value.(model[:x_bs]))
         push!(b_bs, value.(model[:b_bs]))
         push!(z_bs, value.(model[:z_bs]))
     end
@@ -70,9 +66,9 @@ function relax_and_fix(parameters::Params, block_partitions, optimizer)
 end
 
 """Fix-and-optimize heuristic."""
-function fix_and_optimize(parameters::Params, z_bs, w_bb)
+function fix_and_optimize(parameters::Params, specs::Specs, z_bs, w_bb)
     @unpack blocks, shelves = parameters
-    model = ShelfSpaceAllocationModel(parameters, Specs(blocking=true))
+    model = ShelfSpaceAllocationModel(parameters, specs)
 
     # Fix z_bb variables
     for b in blocks, s in shelves
@@ -91,15 +87,14 @@ end
 
 
 # --- Arguments ---
-# Cases: "small", "medium", "large"
-case = "medium"
+case = "large" # ∈ Set("small", "medium", "large")
 partition_size = Dict(
     "small" => 4,
     "medium" => 2,
     "large" => 6
 )[case]
 block_partition_order = Dict(
-    "small" => "decreasing",
+    "small" => "increasing",
     "medium" => "decreasing",
     "large" => "increasing"
 )[case]
@@ -119,13 +114,14 @@ save_json(parameters, joinpath(output_dir, "parameters.json"))
 
 # --- Space allocation without blocks ---
 @info "Space allocation without blocks"
-model1 = ShelfSpaceAllocationModel(parameters, Specs(blocking=false))
+specs1 =Specs(height_placement=false, blocking=false)
+model1 = ShelfSpaceAllocationModel(parameters, specs1)
 
 optimizer1 = with_optimizer(
     Gurobi.Optimizer,
     TimeLimit=60,
     LogFile=joinpath(output_dir, "grb_ssa_no_blocks.log"),
-    MIPGap=false
+    MIPGap=0.01
 )
 optimize!(model1, optimizer1);
 
@@ -169,7 +165,8 @@ optimizer2 = with_optimizer(
     MIPFocus=3,
     MIPGap=0.01
 )
-model2 = relax_and_fix(parameters, block_partitions, optimizer2)
+specs2 = Specs(height_placement=false, blocking=true)
+model2 = relax_and_fix(parameters, specs2, block_partitions, optimizer2)
 
 variables2 = Variables(model2)
 objectives2 = Objectives(model2)
@@ -180,14 +177,14 @@ save_json(objectives2, joinpath(output_dir, "objectives2.json"))
 # --- Fix-and-Optimize Heuristic ---
 @info "Fix-and-optimize"
 model3 = fix_and_optimize(
-    parameters, value.(model2[:z_bs]), value.(model2[:w_bb]))
+    parameters, specs2, value.(model2[:z_bs]), value.(model2[:w_bb]))
 
 optimizer3 = with_optimizer(
     Gurobi.Optimizer,
     TimeLimit=2*60,
     LogFile=joinpath(output_dir, "grb_fix_and_optimize.log"),
     MIPFocus=3,
-    MIPGap=false
+    MIPGap=0.005
 )
 optimize!(model3, optimizer3)
 
@@ -200,46 +197,41 @@ save_json(objectives3, joinpath(output_dir, "objectives3.json"))
 @info "Plotting"
 
 # --- Plotting 1 ---
-p1 = plot_planograms_no_blocks(parameters, variables1)
-for (i, p) in enumerate(p1)
+ps = plot_planograms_no_blocks(parameters, variables1)
+for (i, p) in enumerate(ps)
     savefig(p, joinpath(output_dir, "planogram_no_blocks_$i.svg"))
 end
 
-p2 = plot_allocation_amount(parameters, variables1)
-savefig(p2, joinpath(output_dir, "allocation_amount_no_blocks.svg"))
+p = plot_allocation_amount(parameters, variables1)
+savefig(p, joinpath(output_dir, "allocation_amount_no_blocks.svg"))
 
 
 # --- Plotting 2 ---
-p2 = plot_block_allocations(parameters, variables2)
-for (i, p) in enumerate(p2)
-    savefig(p, joinpath(output_dir, "block_allocation_relax_and_fix_$i.svg"))
+ps = plot_planograms(parameters, variables2)
+for (i, p) in enumerate(ps)
+    savefig(p, joinpath(output_dir, "planogram_relax_and_fix_$i.svg"))
 end
 
 
 # --- Plotting 3 ---
-p1 = plot_planograms(parameters, variables3)
-for (i, p) in enumerate(p1)
+ps = plot_planograms(parameters, variables3)
+for (i, p) in enumerate(ps)
     savefig(p, joinpath(output_dir, "planogram_$i.svg"))
 end
 
-p2 = plot_block_allocations(parameters, variables3)
-for (i, p) in enumerate(p2)
-    savefig(p, joinpath(output_dir, "block_allocation_$i.svg"))
-end
+p = plot_product_facings(parameters, variables3)
+savefig(p, joinpath(output_dir, "product_facings.svg"))
 
-p3 = plot_product_facings(parameters, variables3)
-savefig(p3, joinpath(output_dir, "product_facings.svg"))
-
-p4 = plot_demand_and_sales(parameters, variables3)
-savefig(p4, joinpath(output_dir, "demand_and_sales.svg"))
+p = plot_demand_and_sales(parameters, variables3)
+savefig(p, joinpath(output_dir, "demand_and_sales.svg"))
 
 p = plot_demand_sales_percentage(parameters, variables3)
 savefig(p, joinpath(output_dir, "demand_sales_percentage.svg"))
 
-p5 = plot_allocation_amount(parameters, variables3)
-savefig(p5, joinpath(output_dir, "allocation_amount.svg"))
+p = plot_allocation_amount(parameters, variables3)
+savefig(p, joinpath(output_dir, "allocation_amount.svg"))
 
-p6 = plot_allocation_percentage(
+p = plot_allocation_percentage(
     parameters, variables3,
     with_optimizer(Gurobi.Optimizer, TimeLimit=60, LogToConsole=false))
-savefig(p6, joinpath(output_dir, "allocation_percentage.svg"))
+savefig(p, joinpath(output_dir, "allocation_percentage.svg"))

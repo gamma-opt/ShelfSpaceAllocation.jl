@@ -39,7 +39,7 @@ parameters = Params(
     "examples/instances/$case/products.csv",
     "examples/instances/$case/shelves.csv"
 )
-specs = Specs(blocking=true)
+specs = Specs(height_placement=true, blocking=true)
 model = ShelfSpaceAllocationModel(parameters, specs)
 
 optimizer = with_optimizer(
@@ -69,6 +69,8 @@ parameters = load_json(Params, joinpath(output_dir, "parameters.json"))
 variables = load_json(Variables, joinpath(output_dir, "variables.json"))
 objectives = load_json(Objectives, joinpath(output_dir, "objectives.json"))
 ```
+
+The [plotting](https://jaantollander.github.com/ShelfSpaceAllocation.jl/plotting/) section of the documentation shows how to visualize the results.
 
 Example of *relax-and-fix* and *fix-and-optimize* heuristics is available in  [`heuristics.jl`](./examples/heuristics.jl) file.
 

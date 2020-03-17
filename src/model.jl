@@ -5,7 +5,8 @@ const ShelfSpaceAllocationModel = Model
 
 """Specs"""
 @with_kw struct Specs
-    blocking::Bool
+    height_placement::Bool = true
+    blocking::Bool = true
 end
 
 """Parameters"""
@@ -99,7 +100,7 @@ end
 """
 Variables(model::ShelfSpaceAllocationModel) = model_to_dtype(Variables, model)
 
-"""Objetive values from model.
+"""Objective values from model.
 
 # Arguments
 - `model::ShelfSpaceAllocationModel`
@@ -152,8 +153,12 @@ function ShelfSpaceAllocationModel(parameters::Params, specs::Specs)
         sum(o_s[s] for s in shelves))
     @expression(model, profit_loss,
         sum(G_p[p] * e_p[p] for p in products))
-    @expression(model, height_placement_penalty,
-        sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves))
+    if specs.height_placement
+        @expression(model, height_placement_penalty,
+            sum(L_p[p] * L_s[s] * n_ps[p, s] for p in products for s in shelves))
+    else
+        @expression(model, height_placement_penalty, AffExpr(0.0))
+    end
     @objective(model, Min,
         w1 * empty_shelf_space +
         w2 * profit_loss +

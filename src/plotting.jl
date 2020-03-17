@@ -3,7 +3,8 @@ using Parameters, Plots, JuMP, LaTeXStrings
 const block_colors = cgrad(:inferno)
 
 """Creates a planogram which visualizes the product placement on the shelves."""
-function plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, x_bs)
+function plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p, n_ps, o_s, b_bs, x_bs, z_bs)
+    # TODO: add keyword arguments for; draw_products, draw_block_allocations
     # Initialize the plot
     plt = plot(
         legend=:none,
@@ -42,6 +43,24 @@ function plot_planogram(products, shelves, blocks, P_b, H_s, H_p, W_p, W_s, SK_p
     end
     plot!(plt, [0, W_s[shelves[end]]], [y_s[end], y_s[end]],
           color=:black, linestyle=:dash)
+
+    # Draw block allocations
+    for b in blocks
+      for s in shelves
+          if z_bs[b, s] == 0
+              continue
+          end
+          color = block_colors[b/length(blocks)]
+          scatter!(
+              plt, [x_bs[b, s]], [y_s[s-shelves[1]+1]],
+              color=color, markerstrokewidth=0, markersize = 2.5)
+          plot!(
+              plt, [x_bs[b, s], x_bs[b, s] + b_bs[b, s]],
+                   [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
+              color=color)
+          # TODO: plot endpoints?
+      end
+    end
 
     return plt
 end
@@ -94,9 +113,10 @@ end
 function plot_planograms(parameters::Params, variables::Variables)
     @unpack products, shelves, blocks, S_m, P_b, H_s, H_p, W_p, W_s, SK_p =
             parameters
-    @unpack n_ps, o_s, x_bs = variables
+    @unpack n_ps, o_s, b_bs, x_bs, z_bs = variables
     return [plot_planogram(products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s,
-                           SK_p, n_ps, o_s, x_bs) for shelves′ in S_m]
+                           SK_p, n_ps, o_s, b_bs, x_bs, z_bs)
+                           for shelves′ in S_m]
 end
 
 """Create a planogram for each module without blocks."""
@@ -107,49 +127,6 @@ function plot_planograms_no_blocks(parameters::Params, variables::Variables)
     return [plot_planogram_no_blocks(
                 products, shelves′, blocks, P_b, H_s, H_p, W_p, W_s, SK_p,
                 n_ps, o_s) for shelves′ in S_m]
-end
-
-"""Block starting locations and widths."""
-function plot_block_allocation(shelves, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-    plt = plot(
-        legend=:none,
-        background=:lightgray,
-        size=(780, 400)
-    )
-    y_s = vcat([0], cumsum([H_s[s] for s in shelves]))
-
-    # Draw shelves
-    for s in shelves
-        plot!(plt, [0, W_s[s]], [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
-              color=:gray, linestyle=:dot)
-    end
-    plot!(plt, [0, W_s[shelves[end]]], [y_s[end], y_s[end]],
-          color=:gray, linestyle=:dash)
-
-    for b in blocks
-        for s in shelves
-            if z_bs[b, s] == 0
-                continue
-            end
-            color = block_colors[b/length(blocks)]
-            scatter!(
-                plt, [x_bs[b, s]], [y_s[s-shelves[1]+1]],
-                color=color, markerstrokewidth=0, markersize = 2.5)
-            plot!(
-                plt, [x_bs[b, s], x_bs[b, s] + b_bs[b, s]],
-                     [y_s[s-shelves[1]+1], y_s[s-shelves[1]+1]],
-                color=color)
-        end
-    end
-    return plt
-end
-
-"""Create block_allocation for each module."""
-function plot_block_allocations(parameters::Params, variables::Variables)
-    @unpack blocks, S_m, H_s, W_s = parameters
-    @unpack b_bs, x_bs, z_bs = variables
-    return [plot_block_allocation(shelves′, blocks, H_s, W_s, b_bs, x_bs, z_bs)
-                                  for shelves′ in S_m]
 end
 
 """Creates a barchart of number of product facings per product."""
@@ -268,7 +245,7 @@ function plot_allocation_percentage(parameters::Params, variables::Variables,
     pr = [sum(n_ps[p, s] for p in P_b[b] for s in shelves) for b in blocks]
     pr_max = []
     for b in blocks
-        specs = Specs(blocking=false)
+        specs = Specs(height_placement=false, blocking=false)
         parameters2 = Params(
             P_b[b], shelves, Integer[], Integer[], [Integer[]], [Integer[]],
             N_p_min, N_p_max, G_p, R_p, D_p, L_p, W_p, H_p, M_p, SK_p, M_s_min,

@@ -21,20 +21,12 @@ plot_planograms(parameters, variables)[m]
 
 Planogram visualizes the product placing on the shelves. Blocks are indicated by the different colors.
 
+Block allocation visualizes the block starting location $x_{b,s}$ and block width $b_{b,s}$ for each block and for each shelf.
+
 - [`plot_planogram`](@ref)
 - [`plot_planograms`](@ref)
 - [`plot_planogram_no_blocks`](@ref)
 - [`plot_planograms_no_blocks`](@ref)
-
-## Block Allocation
-```@example plots
-plot_block_allocations(parameters, variables)[m]
-```
-
-Block allocation visualizes the block starting location $x_{b,s}$ and block width $b_{b,s}$ for each block and for each shelf.
-
-- [`plot_block_allocation`](@ref)
-- [`plot_block_allocations`](@ref)
 
 
 ## Product Facings
