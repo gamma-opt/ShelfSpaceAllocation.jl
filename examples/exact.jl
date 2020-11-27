@@ -31,14 +31,15 @@ model = ShelfSpaceAllocationModel(parameters, specs)
 
 @info "Starting the optimization"
 using JuMP, Gurobi
-optimizer = with_optimizer(
-    Gurobi.Optimizer,
-    TimeLimit=time_limit,
-    LogFile=joinpath(output_dir, "gurobi.log"),
-    MIPFocus=3,
-    MIPGap=mip_gap,
+optimizer = optimizer_with_attributes(
+    () -> Gurobi.Optimizer(Gurobi.Env()),
+    "TimeLimit" => time_limit,
+    "LogFile" => joinpath(output_dir, "gurobi.log"),
+    "MIPFocus" => 3,
+    "MIPGap" => mip_gap
 )
-optimize!(model, optimizer)
+set_optimizer(model, optimizer)
+optimize!(model)
 
 if termination_status(model) == MOI.INFEASIBLE
     exit()

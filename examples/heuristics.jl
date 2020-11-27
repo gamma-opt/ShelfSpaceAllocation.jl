@@ -46,7 +46,8 @@ function relax_and_fix(parameters::Params, specs::Specs, block_partitions, optim
             end
         end
 
-        optimize!(model, optimizer)
+        set_optimizer(model, optimizer)
+        optimize!(model)
 
         if termination_status(model) == MOI.INFEASIBLE
             exit()
@@ -112,16 +113,17 @@ save_json(parameters, joinpath(output_dir, "parameters.json"))
 
 # --- Space allocation without blocks ---
 @info "Space allocation without blocks"
-specs1 =Specs(height_placement=false, blocking=false)
+specs1 = Specs(height_placement=false, blocking=false)
 model1 = ShelfSpaceAllocationModel(parameters, specs1)
 
-optimizer1 = with_optimizer(
-    Gurobi.Optimizer,
-    TimeLimit=60,
-    LogFile=joinpath(output_dir, "grb_ssa_no_blocks.log"),
-    MIPGap=0.01
+optimizer1 = optimizer_with_attributes(
+    () -> Gurobi.Optimizer(Gurobi.Env()),
+    "TimeLimit" => 60,
+    "LogFile" => joinpath(output_dir, "grb_ssa_no_blocks.log"),
+    "MIPGap" => 0.01
 )
-optimize!(model1, optimizer1);
+set_optimizer(model1, optimizer1)
+optimize!(model1);
 
 variables1 = Variables(model1)
 objectives1 = Objectives(model1)
@@ -156,12 +158,12 @@ block_partitions = partition(partition_size, block_indices)
 
 # --- Relax-and-Fix Heuristic ---
 @info "Relax-and-fix"
-optimizer2 = with_optimizer(
-    Gurobi.Optimizer,
-    TimeLimit=5*60,
-    LogFile=joinpath(output_dir, "grb_relax_and_fix.log"),
-    MIPFocus=3,
-    MIPGap=0.01
+optimizer2 = optimizer_with_attributes(
+    () -> Gurobi.Optimizer(Gurobi.Env()),
+    "TimeLimit" => 5*60,
+    "LogFile" => joinpath(output_dir, "grb_relax_and_fix.log"),
+    "MIPFocus" => 3,
+    "MIPGap" => 0.01
 )
 specs2 = Specs(height_placement=false, blocking=true)
 model2 = relax_and_fix(parameters, specs2, block_partitions, optimizer2)
@@ -177,14 +179,15 @@ save_json(objectives2, joinpath(output_dir, "objectives2.json"))
 model3 = fix_and_optimize(
     parameters, specs2, value.(model2[:z_bs]), value.(model2[:w_bb]))
 
-optimizer3 = with_optimizer(
-    Gurobi.Optimizer,
-    TimeLimit=2*60,
-    LogFile=joinpath(output_dir, "grb_fix_and_optimize.log"),
-    MIPFocus=3,
-    MIPGap=0.005
+optimizer3 = optimizer_with_attributes(
+    () -> Gurobi.Optimizer(Gurobi.Env()),
+    "TimeLimit" => 2*60,
+    "LogFile" => joinpath(output_dir, "grb_fix_and_optimize.log"),
+    "MIPFocus" => 3,
+    "MIPGap" => 0.005
 )
-optimize!(model3, optimizer3)
+set_optimizer(model3, optimizer3)
+optimize!(model3)
 
 variables3 = Variables(model3)
 objectives3 = Objectives(model3)
@@ -231,5 +234,5 @@ savefig(p, joinpath(output_dir, "allocation_amount.svg"))
 
 p = plot_allocation_percentage(
     parameters, variables3,
-    with_optimizer(Gurobi.Optimizer, TimeLimit=60, LogToConsole=false))
+    optimizer_with_attributes(() -> Gurobi.Optimizer(Gurobi.Env()), TimeLimit=60, LogToConsole=false))
 savefig(p, joinpath(output_dir, "allocation_percentage.svg"))

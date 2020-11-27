@@ -45,13 +45,14 @@ parameters = Params(
 specs = Specs(height_placement=true, blocking=true)
 model = ShelfSpaceAllocationModel(parameters, specs)
 
-optimizer = with_optimizer(
-    Gurobi.Optimizer,
-    TimeLimit=5*60,
-    MIPFocus=3,
-    MIPGap=0.01,
+optimizer = optimizer_with_attributes(
+    () -> Gurobi.Optimizer(Gurobi.Env()),
+    "TimeLimit" => 5*60,
+    "MIPFocus" => 3,
+    "MIPGap" => 0.01,
 )
-optimize!(model, optimizer)
+set_optimizer(model, optimizer)
+optimize!(model)
 
 variables = Variables(model)
 objectives = Objectives(model)

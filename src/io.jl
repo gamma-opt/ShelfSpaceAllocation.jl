@@ -82,8 +82,8 @@ Examples of input parameters can found inside `examples/instances` directory.
 """
 function Params(product_path::AbstractString, shelf_path::AbstractString)
     # Load data from CSV files. Data is read into a DataFrame
-    product_data = CSV.read(product_path) |> DataFrame
-    shelf_data = CSV.read(shelf_path) |> DataFrame
+    product_data = CSV.read(product_path, DataFrame)
+    shelf_data = CSV.read(shelf_path, DataFrame)
 
     # Sets and Subsets
     products = 1:size(product_data, 1)
