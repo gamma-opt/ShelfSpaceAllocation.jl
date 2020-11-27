@@ -1,4 +1,25 @@
-using Parameters, JuMP
+using Parameters, JuMP, JuMP.Containers
+
+# --- Utility ---
+
+data(a::DenseAxisArray) = a.data
+data(a::Any) = a
+
+round_int(x::AbstractFloat) = Integer(round(x))
+convert_int(x, ::Type{<:Integer}) = round_int(x)
+convert_int(x, ::Type{Array{T, N}}) where T <: Integer where N = round_int.(x)
+convert_int(x, ::Any) = x
+
+"""The function queries values from the model to data type based on its field names. It extracts values from DenseAxisArray from its `data` field. Then, it converts the values to the corresponding field type. The function rounds integers before conversion because JuMP outputs integer variables as floats."""
+function model_to_dtype(dtype::DataType, model::Model)
+    fields = (
+        value.(model[n]) |> data |> x -> convert_int(x, t)
+        for (n, t) in zip(fieldnames(dtype), fieldtypes(dtype)))
+    dtype(fields...)
+end
+
+
+# --- Model ---
 
 """ShelfSpaceAllocationModel type as JuMP.Model"""
 const ShelfSpaceAllocationModel = Model
@@ -9,88 +30,69 @@ const ShelfSpaceAllocationModel = Model
     blocking::Bool = true
 end
 
+# TODO: I <: Integer, F <: AbstractFloat
+
 """Parameters"""
 @with_kw struct Params
     # --- Sets and Subsets ---
-    products::Array{Integer, 1}
-    shelves::Array{Integer, 1}
-    blocks::Array{Integer, 1}
-    modules::Array{Integer, 1}
-    P_b::Array{Array{Integer, 1}, 1}
-    S_m::Array{Array{Integer, 1}, 1}
+    products::Array{Int, 1}
+    shelves::Array{Int, 1}
+    blocks::Array{Int, 1}
+    modules::Array{Int, 1}
+    P_b::Array{Array{Int, 1}, 1}
+    S_m::Array{Array{Int, 1}, 1}
     # --- Parameters ---
     # Products
-    N_p_min::Array{AbstractFloat, 1}
-    N_p_max::Array{AbstractFloat, 1}
-    G_p::Array{AbstractFloat, 1}
-    R_p::Array{AbstractFloat, 1}
-    D_p::Array{AbstractFloat, 1}
-    L_p::Array{AbstractFloat, 1}
-    W_p::Array{AbstractFloat, 1}
-    H_p::Array{AbstractFloat, 1}
-    M_p::Array{AbstractFloat, 1}
-    SK_p::Array{AbstractFloat, 1}
+    N_p_min::Array{Float64, 1}
+    N_p_max::Array{Float64, 1}
+    G_p::Array{Float64, 1}
+    R_p::Array{Float64, 1}
+    D_p::Array{Float64, 1}
+    L_p::Array{Float64, 1}
+    W_p::Array{Float64, 1}
+    H_p::Array{Float64, 1}
+    M_p::Array{Float64, 1}
+    SK_p::Array{Float64, 1}
     # Shelves
-    M_s_min::Array{AbstractFloat, 1}
-    M_s_max::Array{AbstractFloat, 1}
-    W_s::Array{AbstractFloat, 1}
-    H_s::Array{AbstractFloat, 1}
-    L_s::Array{Integer, 1}
+    M_s_min::Array{Float64, 1}
+    M_s_max::Array{Float64, 1}
+    W_s::Array{Float64, 1}
+    H_s::Array{Float64, 1}
+    L_s::Array{Int, 1}
     # Product-shelves
-    P_ps::Array{AbstractFloat, 2}
+    P_ps::Array{Float64, 2}
     # Constants
-    SL::AbstractFloat = 0.0
-    w1::AbstractFloat = 0.5
-    w2::AbstractFloat = 10.0
-    w3::AbstractFloat = 0.1
+    SL::Float64 = 0.0
+    w1::Float64 = 0.5
+    w2::Float64 = 10.0
+    w3::Float64 = 0.1
 end
 
 """Variables"""
 @with_kw struct Variables
     # --- Basic Variables ---
-    s_p::Array{AbstractFloat, 1}
-    e_p::Array{AbstractFloat, 1}
-    o_s::Array{AbstractFloat, 1}
-    n_ps::Array{Integer, 2}
-    y_p::Array{Integer, 1}
+    s_p::Array{Float64, 1}
+    e_p::Array{Float64, 1}
+    o_s::Array{Float64, 1}
+    n_ps::Array{Int, 2}
+    y_p::Array{Int, 1}
     # --- Blocking Variables ---
-    b_bs::Array{AbstractFloat, 2}
-    m_bm::Array{AbstractFloat, 2}
-    z_bs::Array{Integer, 2}
-    z_bs_f::Array{Integer, 2}
-    z_bs_l::Array{Integer, 2}
-    x_bs::Array{AbstractFloat, 2}
-    x_bm::Array{AbstractFloat, 2}
-    w_bb::Array{Integer, 2}
-    v_bm::Array{Integer, 2}
+    b_bs::Array{Float64, 2}
+    m_bm::Array{Float64, 2}
+    z_bs::Array{Int, 2}
+    z_bs_f::Array{Int, 2}
+    z_bs_l::Array{Int, 2}
+    x_bs::Array{Float64, 2}
+    x_bm::Array{Float64, 2}
+    w_bb::Array{Int, 2}
+    v_bm::Array{Int, 2}
 end
 
 """Objectives"""
 @with_kw struct Objectives
-    empty_shelf_space::AbstractFloat
-    profit_loss::AbstractFloat
-    height_placement_penalty::AbstractFloat
-end
-
-data(a::Number) = a
-data(a::JuMP.Containers.DenseAxisArray) = a.data
-round_int(x::AbstractFloat) = Integer(round(x))
-convert_int(x, t::Type{<:Integer}) = round_int(x)
-convert_int(x, t::Type{Array{T, N}}) where T <: Integer where N = round_int.(x)
-convert_int(x, t) = x
-
-"""Values from model to dtype.
-
-# Arguments
-- `dtype` (DataType)
-- `model::Model`
-"""
-function model_to_dtype(dtype, model::Model)
-    fields = []
-    for (n, t) in zip(fieldnames(dtype), fieldtypes(dtype))
-        push!(fields, value.(model[n]) |> data |> x -> convert_int(x, t))
-    end
-    dtype(fields...)
+    empty_shelf_space::Float64
+    profit_loss::Float64
+    height_placement_penalty::Float64
 end
 
 """Variable values from model.

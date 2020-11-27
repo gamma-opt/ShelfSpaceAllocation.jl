@@ -1,6 +1,4 @@
 using Parameters, Dates, JuMP, Gurobi, Plots, Logging
-
-push!(LOAD_PATH, dirname(@__DIR__))
 using ShelfSpaceAllocation
 
 

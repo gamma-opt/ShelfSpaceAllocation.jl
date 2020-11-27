@@ -1,7 +1,10 @@
 # ShelfSpaceAllocation
 ![](docs/src/figures/planogram.svg)
 
-This package contains an optimization model for solving the *shelf space allocation problem (SSAP)* in the context of retail stores, formulated as *mixed-integer linear program (MILP)*. We intended the package for both developing and running the model. It includes the model, visualization capabilities, input/output related functions, and example instances. The [documentation](http://jaantollander.com/ShelfSpaceAllocation.jl/) covers how to use the package, its functionalities, and the model in detail.
+[![Docs Image](https://img.shields.io/badge/docs-latest-blue.svg)](https://gamma-opt.github.io/ShelfSpaceAllocation.jl/dev/)
+![Runtests](https://github.com/gamma-opt/ShelfSpaceAllocation.jl/workflows/Runtests/badge.svg)
+
+This package contains an optimization model for solving the *shelf space allocation problem (SSAP)* in the context of retail stores, formulated as *mixed-integer linear program (MILP)*. We intended the package for both developing and running the model. It includes the model, visualization capabilities, input/output related functions, and example instances. The [documentation](https://gamma-opt.github.io/ShelfSpaceAllocation.jl/) covers how to use the package, its functionalities, and the model in detail.
 
 This package is a part of a research project at the Systems Analysis Laboratory at Aalto University, authored by *Fabricio Oliveira* and *Jaan Tollander de Balsch*.
 
@@ -70,7 +73,7 @@ variables = load_json(Variables, joinpath(output_dir, "variables.json"))
 objectives = load_json(Objectives, joinpath(output_dir, "objectives.json"))
 ```
 
-The [plotting](https://jaantollander.github.com/ShelfSpaceAllocation.jl/plotting/) section of the documentation shows how to visualize the results.
+The [plotting](https://gamma-opt.github.io/ShelfSpaceAllocation.jl/plotting/) section of the documentation shows how to visualize the results.
 
 Example of *relax-and-fix* and *fix-and-optimize* heuristics is available in  [`heuristics.jl`](./examples/heuristics.jl) file.
 
@@ -78,7 +81,7 @@ Example of *relax-and-fix* and *fix-and-optimize* heuristics is available in  [`
 Install the [Julia language](https://julialang.org/) and then install this package.
 
 ```bash
-pkg> add https://github.com/jaantollander/ShelfSpaceAllocation.jl
+pkg> add https://github.com/gamma-opt/ShelfSpaceAllocation.jl
 ```
 
 ## Development
@@ -86,7 +89,7 @@ Install the [Julia language](https://julialang.org/).
 
 Clone the repository
 ```bash
-git clone https://github.com/jaantollander/ShelfSpaceAllocation.jl
+git clone https://github.com/gamma-opt/ShelfSpaceAllocation.jl
 ```
 
 Install dependencies
